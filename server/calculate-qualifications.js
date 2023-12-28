@@ -24,14 +24,7 @@ exports.handler = async (event, context) => {
 
   try {
     console.log('Making GET request to:', API_URL); // Added console log
-    const response = await axios({
-      method: 'get',
-      url: API_URL,
-      headers: {
-        'Content-Type': 'application/json',
-        'API-Key': API_KEY
-      },
-    });
+    const response = await axios.get(API_URL);
 
     // Process the response to calculate the total debt amount for credit card or unsecured debts
     const debts = response.data.response;
