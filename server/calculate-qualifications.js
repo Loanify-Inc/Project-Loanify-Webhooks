@@ -43,6 +43,7 @@ exports.handler = async (event, context) => {
       'InstallmentLoan',
     ];
 
+    // Create debtDetails array
     const debtDetails = debts
       .filter(debt => {
         // Extract the allowed debt type from the notes
@@ -50,20 +51,28 @@ exports.handler = async (event, context) => {
         return !!debtType;
       })
       .map(debt => ({
-        accountNumber: debt.og_account_num, // Use og_account_num as accountNumber
-        companyName: debt.creditor.company_name, // Use creditor's company name as companyName
+        accountNumber: debt.og_account_num,
+        companyName: debt.creditor.company_name,
         individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
         debtType: allowedDebtTypes.find(type => debt.notes.includes(type)),
       }));
 
+    // Modify the debtDetails structure to make it more vertical
+    const formattedDebtDetails = debtDetails.map(debt => ({
+      accountNumber: debt.accountNumber,
+      companyName: debt.companyName,
+      individualDebtAmount: debt.individualDebtAmount,
+      debtType: debt.debtType,
+    }));
+
     const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
 
     console.log('Calculated total debt:', totalDebt);
-    console.log('Debt details:', debtDetails);
+    console.log('Debt details:', formattedDebtDetails);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ totalDebt: totalDebt, debts: debtDetails }),
+      body: JSON.stringify({ totalDebt: totalDebt, debts: formattedDebtDetails }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   } catch (error) {
@@ -101,6 +110,7 @@ function performHttpRequest(options) {
     req.end();
   });
 }
+
 
 
 
