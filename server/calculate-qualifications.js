@@ -1,7 +1,7 @@
 const https = require('https');
 
 exports.handler = async (event, context) => {
-  const API_KEY = '0db948a6-50f1-d9f3-4579-4f8036dc3830';
+  const API_KEY = process.env.API_KEY;
   const BASE_URL = 'api.forthcrm.com';
   const contactId = JSON.parse(event.body).contact_id;
 
