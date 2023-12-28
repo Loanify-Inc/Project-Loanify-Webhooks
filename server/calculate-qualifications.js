@@ -8,7 +8,10 @@ exports.handler = async (event, context) => {
   const body = JSON.parse(event.body);
   const contactId = body.contact_id; // Ensure 'contact_id' matches the key in the incoming request
 
+  console.log('Received request with contact_id:', contactId); // Added console log
+
   if (!contactId) {
+    console.error('Contact ID is required'); // Added console error
     return {
       statusCode: 400,
       body: JSON.stringify({ error: 'Contact ID is required' }),
@@ -19,6 +22,7 @@ exports.handler = async (event, context) => {
   const API_URL = `${BASE_URL}/${contactId}/debts/enrolled`;
 
   try {
+    console.log('Making GET request to:', API_URL); // Added console log
     const response = await axios({
       method: 'get',
       url: API_URL,
@@ -28,23 +32,26 @@ exports.handler = async (event, context) => {
       },
     });
 
-    /*// Process the response to calculate the total debt amount for credit card or unsecured debts
+    // Process the response to calculate the total debt amount for credit card or unsecured debts
     const debts = response.data.response;
     const totalDebt = debts.reduce((acc, debt) => {
       if (debt.notes.includes('CreditCard') || debt.notes.includes('Unsecured')) {
         return acc + parseFloat(debt.current_debt_amount);
       }
       return acc;
-    }, 0);*/
+    }, 0);
+
+    console.log('Calculated total debt:', totalDebt); // Added console log
 
     // Return the calculated total debt
     return {
       statusCode: 200,
-      body: JSON.stringify({ totalDebt: "This worked" }), // toFixed(2) to format it as a fixed-point notation
+      body: JSON.stringify({ totalDebt: totalDebt.toFixed(2) }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   } catch (error) {
     // Handle axios errors
+    console.error('Error:', error.message); // Added console error
     return {
       statusCode: error.response ? error.response.status : 500,
       body: JSON.stringify({ error: error.message }),
