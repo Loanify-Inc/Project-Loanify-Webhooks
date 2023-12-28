@@ -28,19 +28,19 @@ exports.handler = async (event, context) => {
       },
     });
 
-    // Process the response to calculate the total debt amount for credit card or unsecured debts
+    /*// Process the response to calculate the total debt amount for credit card or unsecured debts
     const debts = response.data.response;
     const totalDebt = debts.reduce((acc, debt) => {
       if (debt.notes.includes('CreditCard') || debt.notes.includes('Unsecured')) {
         return acc + parseFloat(debt.current_debt_amount);
       }
       return acc;
-    }, 0);
+    }, 0);*/
 
     // Return the calculated total debt
     return {
       statusCode: 200,
-      body: JSON.stringify({ totalDebt: totalDebt.toFixed(2) }), // toFixed(2) to format it as a fixed-point notation
+      body: JSON.stringify({ totalDebt: "This worked" }), // toFixed(2) to format it as a fixed-point notation
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   } catch (error) {

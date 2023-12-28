@@ -1,81 +1,54 @@
-const mongoose = require('mongoose');
-const User = require("./auth/auth.model");
-var jwt = require("jsonwebtoken");
-var bcrypt = require("bcryptjs");
+const axios = require('axios');
 
 exports.handler = async (event, context) => {
-  await mongoose
-    .connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(() => {
-      console.log("Successfully connected to MongoDB.");
-    })
-    .catch(err => {
-      console.error("Connection error", err);
-      process.exit();
-    });
+  const API_KEY = '0db948a6-50f1-d9f3-4579-4f8036dc3830';
+  const BASE_URL = 'https://api.forthcrm.com/v1/contacts';
 
-  if (event.httpMethod !== "POST") {
+  // Extract the contact ID from the incoming request body
+  const body = JSON.parse(event.body);
+  const contactId = body.contact_id; // Ensure 'contact_id' matches the key in the incoming request
+
+  if (!contactId) {
     return {
-      statusCode: 405,
-      body: JSON.stringify({
-        message: "Method not allowed"
-      }),
-      headers: { "Access-Control-Allow-Origin": "*" }
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Contact ID is required' }),
+      headers: { 'Access-Control-Allow-Origin': '*' },
     };
   }
 
-  const body = JSON.parse(event.body)
+  const API_URL = `${BASE_URL}/${contactId}/debts/enrolled`;
 
   try {
-    const user = await User.findOne({ email: body.email });
+    const response = await axios({
+      method: 'get',
+      url: API_URL,
+      headers: {
+        'Content-Type': 'application/json',
+        'API-Key': API_KEY,
+      },
+    });
 
-    if (!user) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({
-          message: "User Not found."
-        }),
-        headers: { "Access-Control-Allow-Origin": "*" }
-      };
-    }
+    // Process the response to calculate the total debt amount for credit card or unsecured debts
+    const debts = response.data.response;
+    const totalDebt = debts.reduce((acc, debt) => {
+      if (debt.notes.includes('CreditCard') || debt.notes.includes('Unsecured')) {
+        return acc + parseFloat(debt.current_debt_amount);
+      }
+      return acc;
+    }, 0);
 
-    const passwordIsValid = bcrypt.compareSync(
-      body.password,
-      user.password
-    );
-
-    if (!passwordIsValid) {
-      return {
-        statusCode: 401,
-        body: JSON.stringify({
-          accessToken: null,
-          message: "Invalid Password!"
-        }),
-        headers: { "Access-Control-Allow-Origin": "*" }
-      };
-    }
-
-    var token = jwt.sign({ id: user.id }, process.env.SECRET, {});
-
+    // Return the calculated total debt
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        _id: user._id,
-        email: user.email,
-        accessToken: token
-      }),
-      headers: { "Access-Control-Allow-Origin": "*" }
+      body: JSON.stringify({ totalDebt: totalDebt.toFixed(2) }), // toFixed(2) to format it as a fixed-point notation
+      headers: { 'Access-Control-Allow-Origin': '*' },
     };
   } catch (error) {
+    // Handle axios errors
     return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: error.message
-      }),
-      headers: { "Access-Control-Allow-Origin": "*" }
-    }
+      statusCode: error.response ? error.response.status : 500,
+      body: JSON.stringify({ error: error.message }),
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    };
   }
-}
+};
