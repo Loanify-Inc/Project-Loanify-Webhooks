@@ -58,12 +58,15 @@ exports.handler = async (event, context) => {
 
     const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
 
+    // Determine the status based on the totalDebt amount
+    const status = totalDebt >= 10000 ? 'Qualified' : 'Not Qualified';
+
     console.log('Calculated total debt:', totalDebt);
     console.log('Debt details:', debtDetails);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ totalDebt: totalDebt, debts: debtDetails }),
+      body: JSON.stringify({ totalDebt: totalDebt, status: status, debts: debtDetails }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   } catch (error) {
@@ -101,6 +104,7 @@ function performHttpRequest(options) {
     req.end();
   });
 }
+
 
 
 
