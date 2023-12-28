@@ -30,27 +30,30 @@ exports.handler = async (event, context) => {
 
     // Parse the response and extract the required information
     const debts = JSON.parse(response).response;
+    const allowedDebtTypes = [
+      'CreditCard',
+      'Unsecured',
+      'CheckCreditOrLineOfCredit',
+      'Automobile',
+      'Collection',
+      'MedicalDebt',
+      'ChargeAccount',
+      'Recreational',
+      'NoteLoan',
+      'InstallmentLoan',
+    ];
+
     const debtDetails = debts
       .filter(debt => {
-        const allowedDebtTypes = [
-          'CreditCard',
-          'Unsecured',
-          'CheckCreditOrLineOfCredit',
-          'Automobile',
-          'Collection',
-          'MedicalDebt',
-          'ChargeAccount',
-          'Recreational',
-          'NoteLoan',
-          'InstallmentLoan',
-        ];
-        return allowedDebtTypes.some(type => debt.notes.includes(type));
+        // Extract the allowed debt type from the notes
+        const debtType = allowedDebtTypes.find(type => debt.notes.includes(type));
+        return !!debtType;
       })
       .map(debt => ({
         accountNumber: debt.account_number,
         companyName: debt.company_name,
         individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
-        debtType: debt.notes,
+        debtType: allowedDebtTypes.find(type => debt.notes.includes(type)),
       }));
 
     const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
@@ -98,5 +101,6 @@ function performHttpRequest(options) {
     req.end();
   });
 }
+
 
 
