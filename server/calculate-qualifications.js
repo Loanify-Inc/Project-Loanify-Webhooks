@@ -31,18 +31,31 @@ exports.handler = async (event, context) => {
     // Parse the response and return the entire debt object along with the total debt
     const debts = JSON.parse(response).response;
     const totalDebt = debts.reduce((acc, debt) => {
-      if (debt.notes.includes('CreditCard') || debt.notes.includes('Unsecured')) {
+      const allowedDebtTypes = [
+        'CreditCard',
+        'Unsecured',
+        'CheckCreditOrLineOfCredit',
+        'Automobile',
+        'Collection',
+        'MedicalDebt',
+        'ChargeAccount',
+        'Recreational',
+        'NoteLoan',
+        'InstallmentLoan',
+      ];
+
+      if (allowedDebtTypes.some(type => debt.notes.includes(type))) {
         return acc + parseFloat(debt.current_debt_amount);
       }
       return acc;
     }, 0);
 
     console.log('Calculated total debt:', totalDebt);
-    console.log('Entire debt object:', debts); // Added this line to log the entire debt object
+    console.log('Entire debt object:', debts);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ totalDebt: totalDebt.toFixed(2), debts }), // Include the entire debt object
+      body: JSON.stringify({ totalDebt: totalDebt.toFixed(2), debts }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   } catch (error) {
