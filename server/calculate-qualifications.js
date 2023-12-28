@@ -50,8 +50,8 @@ exports.handler = async (event, context) => {
         return !!debtType;
       })
       .map(debt => ({
-        accountNumber: debt.og_account_num,
-        companyName: debt.creditors[0].company_name,
+        accountNumber: debt.og_account_num || '',
+        companyName: (debt.creditors[0] && debt.creditors[0].company_name) || '',
         individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
         debtType: allowedDebtTypes.find(type => debt.notes.includes(type)),
       }));
@@ -101,6 +101,7 @@ function performHttpRequest(options) {
     req.end();
   });
 }
+
 
 
 
