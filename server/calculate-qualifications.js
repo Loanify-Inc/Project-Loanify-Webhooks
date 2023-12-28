@@ -20,6 +20,7 @@ exports.handler = async (event, context) => {
   }
 
   const API_URL = `${BASE_URL}/${contactId}/debts/enrolled`;
+  console.log('API URL:', API_URL); // Added console log
 
   try {
     console.log('Making GET request to:', API_URL); // Added console log
