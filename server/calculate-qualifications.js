@@ -28,10 +28,13 @@ exports.handler = async (event, context) => {
   try {
     const response = await performHttpRequest(options);
 
-    // Parse the response and return the entire debt object along with the total debt
+    // Parse the response and extract the required information
     const debts = JSON.parse(response).response;
-    const totalDebt = debts.reduce((acc, debt) => {
-      const allowedDebtTypes = [
+    const debtDetails = debts.map(debt => ({
+      accountNumber: debt.account_number,
+      companyName: debt.company_name,
+      individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
+      debtType: debt.notes.filter(note => [
         'CreditCard',
         'Unsecured',
         'CheckCreditOrLineOfCredit',
@@ -42,20 +45,17 @@ exports.handler = async (event, context) => {
         'Recreational',
         'NoteLoan',
         'InstallmentLoan',
-      ];
+      ].includes(note)),
+    }));
 
-      if (allowedDebtTypes.some(type => debt.notes.includes(type))) {
-        return acc + parseFloat(debt.current_debt_amount);
-      }
-      return acc;
-    }, 0);
+    const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
 
     console.log('Calculated total debt:', totalDebt);
-    console.log('Entire debt object:', debts);
+    console.log('Debt details:', debtDetails);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ totalDebt: totalDebt.toFixed(2), debts }),
+      body: JSON.stringify({ totalDebt: totalDebt, debts: debtDetails }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   } catch (error) {
