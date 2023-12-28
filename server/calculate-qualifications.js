@@ -34,7 +34,11 @@ exports.handler = async (event, context) => {
       accountNumber: debt.account_number,
       companyName: debt.company_name,
       individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
-      debtType: debt.notes.filter(note => [
+      debtType: debt.notes,
+    }));
+
+    const totalDebt = debtDetails.reduce((acc, debt) => {
+      const allowedDebtTypes = [
         'CreditCard',
         'Unsecured',
         'CheckCreditOrLineOfCredit',
@@ -45,10 +49,13 @@ exports.handler = async (event, context) => {
         'Recreational',
         'NoteLoan',
         'InstallmentLoan',
-      ].includes(note)),
-    }));
+      ];
 
-    const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
+      if (allowedDebtTypes.some(type => debt.debtType.includes(type))) {
+        return acc + parseFloat(debt.individualDebtAmount);
+      }
+      return acc;
+    }, 0).toFixed(2);
 
     console.log('Calculated total debt:', totalDebt);
     console.log('Debt details:', debtDetails);
@@ -93,3 +100,4 @@ function performHttpRequest(options) {
     req.end();
   });
 }
+
