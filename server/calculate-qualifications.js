@@ -30,32 +30,30 @@ exports.handler = async (event, context) => {
 
     // Parse the response and extract the required information
     const debts = JSON.parse(response).response;
-    const debtDetails = debts.map(debt => ({
-      accountNumber: debt.account_number,
-      companyName: debt.company_name,
-      individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
-      debtType: debt.notes,
-    }));
+    const debtDetails = debts
+      .filter(debt => {
+        const allowedDebtTypes = [
+          'CreditCard',
+          'Unsecured',
+          'CheckCreditOrLineOfCredit',
+          'Automobile',
+          'Collection',
+          'MedicalDebt',
+          'ChargeAccount',
+          'Recreational',
+          'NoteLoan',
+          'InstallmentLoan',
+        ];
+        return allowedDebtTypes.some(type => debt.notes.includes(type));
+      })
+      .map(debt => ({
+        accountNumber: debt.account_number,
+        companyName: debt.company_name,
+        individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
+        debtType: debt.notes,
+      }));
 
-    const totalDebt = debtDetails.reduce((acc, debt) => {
-      const allowedDebtTypes = [
-        'CreditCard',
-        'Unsecured',
-        'CheckCreditOrLineOfCredit',
-        'Automobile',
-        'Collection',
-        'MedicalDebt',
-        'ChargeAccount',
-        'Recreational',
-        'NoteLoan',
-        'InstallmentLoan',
-      ];
-
-      if (allowedDebtTypes.some(type => debt.debtType.includes(type))) {
-        return acc + parseFloat(debt.individualDebtAmount);
-      }
-      return acc;
-    }, 0).toFixed(2);
+    const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
 
     console.log('Calculated total debt:', totalDebt);
     console.log('Debt details:', debtDetails);
@@ -100,4 +98,5 @@ function performHttpRequest(options) {
     req.end();
   });
 }
+
 
