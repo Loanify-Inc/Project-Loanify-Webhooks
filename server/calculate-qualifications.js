@@ -22,18 +22,16 @@ exports.handler = async (event, context) => {
   const API_URL = `${BASE_URL}/${contactId}/debts/enrolled`;
   console.log('API URL:', API_URL); // Added console log
 
-  /*try {
+  try {
     console.log('Making GET request to:', API_URL); // Added console log
     const response = await axios({
       method: 'get',
       url: API_URL,
       headers: {
         'Content-Type': 'application/json',
-        'API-Key': API_KEY,
+        'API-Key': API_KEY
       },
     });
-
-    console.log('Response:', response); // Added console log
 
     // Process the response to calculate the total debt amount for credit card or unsecured debts
     const debts = response.data.response;
@@ -60,11 +58,5 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ error: error.message }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
-  }*/
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ totalDebt: "This worked" }),
-    headers: { 'Access-Control-Allow-Origin': '*' },
-  };
+  }
 };
