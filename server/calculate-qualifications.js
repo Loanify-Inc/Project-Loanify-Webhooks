@@ -74,7 +74,34 @@ exports.handler = async (event, context) => {
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   }
+};
+
+function performHttpRequest(options) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let data = '';
+
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      res.on('end', () => {
+        if (res.statusCode === 200) {
+          resolve(data);
+        } else {
+          reject({ statusCode: res.statusCode, message: data });
+        }
+      });
+    });
+
+    req.on('error', (error) => {
+      reject({ statusCode: 500, message: error.message });
+    });
+
+    req.end();
+  });
 }
+
 
 
 
