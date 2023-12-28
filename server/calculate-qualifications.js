@@ -5,8 +5,6 @@ exports.handler = async (event, context) => {
   const BASE_URL = 'api.forthcrm.com';
   const contactId = JSON.parse(event.body).contact_id;
 
-  console.log('Received request with contact_id:', contactId);
-
   if (!contactId) {
     console.error('Contact ID is required');
     return {
@@ -27,13 +25,10 @@ exports.handler = async (event, context) => {
     },
   };
 
-  console.log('Making GET request to:', API_PATH);
-
   try {
     const response = await performHttpRequest(options);
-    console.log('Response:', response);
 
-    // Process the response to calculate the total debt amount for credit card or unsecured debts
+    // Parse the response and return the entire debt object along with the total debt
     const debts = JSON.parse(response).response;
     const totalDebt = debts.reduce((acc, debt) => {
       if (debt.notes.includes('CreditCard') || debt.notes.includes('Unsecured')) {
@@ -43,10 +38,11 @@ exports.handler = async (event, context) => {
     }, 0);
 
     console.log('Calculated total debt:', totalDebt);
+    console.log('Entire debt object:', debts); // Added this line to log the entire debt object
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ totalDebt: totalDebt.toFixed(2) }),
+      body: JSON.stringify({ totalDebt: totalDebt.toFixed(2), debts }), // Include the entire debt object
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   } catch (error) {
