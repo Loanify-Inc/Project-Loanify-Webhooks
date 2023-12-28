@@ -5,7 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.3",
-    "netlify-lambda": "^2.0.16"
+    "netlify-lambda": "^2.0.16",
+    "node-fetch": "^3.3.2"
   },
   "scripts": {
     "start": "./node_modules/.bin/netlify-lambda serve server",
