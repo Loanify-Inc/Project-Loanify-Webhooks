@@ -8,6 +8,15 @@ exports.handler = async (event, context) => {
   // Parse the incoming request body to extract contact data
   const body = JSON.parse(event.body);
 
+  // Ensure that required fields are provided, you can add more validation here
+  if (!body.first_name || !body.last_name || !body.phone_number || !body.address.address1 || !body.address.city || !body.address.state || !body.address.zip || !body.email || !body.date_of_birth) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Required fields are missing in the request' }),
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    };
+  }
+
   // Construct the request body for the Forth API call using the extracted data
   const forthRequestBody = {
     assigned_to: body.assigned_to,
@@ -56,9 +65,13 @@ exports.handler = async (event, context) => {
     };
   } catch (error) {
     console.error('Error:', error.message);
+
+    // Extract the error message from the error object if it exists
+    const errorMessage = error.status && error.status.message ? error.status.message : error.message;
+
     return {
-      statusCode: error.statusCode || 500,
-      body: JSON.stringify({ error: error.message }),
+      statusCode: error.status && error.status.code ? error.status.code : 500,
+      body: JSON.stringify({ error: errorMessage }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   }
@@ -90,4 +103,3 @@ function performHttpRequest(options, requestBody) {
     req.end();
   });
 }
-
