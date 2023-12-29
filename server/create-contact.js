@@ -195,10 +195,15 @@ function performHttpRequest(options, requestBody) {
       });
 
       res.on('end', () => {
-        if (res.statusCode === 200) {
-          resolve(data);
-        } else {
-          reject({ statusCode: res.statusCode, message: data });
+        try {
+          if (res.statusCode === 200) {
+            const parsedData = JSON.parse(data);
+            resolve(parsedData);
+          } else {
+            reject({ statusCode: res.statusCode, message: data });
+          }
+        } catch (error) {
+          reject({ statusCode: 500, message: "Failed to parse JSON response" });
         }
       });
     });
