@@ -9,7 +9,8 @@
     "fs": "0.0.1-security",
     "glob-parent": "^5.1.2",
     "html-pdf": "^3.0.1",
-    "netlify-lambda": "^2.0.16"
+    "netlify-lambda": "^2.0.16",
+    "puppeteer": "^21.6.1"
   },
   "scripts": {
     "start": "./node_modules/.bin/netlify-lambda serve server",

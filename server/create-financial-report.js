@@ -2,7 +2,7 @@ const https = require('https');
 const pdf = require('html-pdf');
 const fs = require('fs');
 const AWS = require('aws-sdk'); // Uncomment this line if using AWS S3
-// const Backblaze = require('backblaze-b2'); // Uncomment this line if using Backblaze B2
+const puppeteer = require('puppeteer');
 
 exports.handler = async (event, context) => {
   const API_KEY = process.env.API_KEY;
@@ -151,14 +151,23 @@ function generateFinancialReport(data) {
 }
 
 // Function to convert HTML to PDF using html-pdf library
+// async function convertHtmlToPdf(htmlContent) {
+//   return new Promise((resolve, reject) => {
+//     pdf.create(htmlContent).toBuffer((err, buffer) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         resolve(buffer);
+//       }
+//     });
+//   });
+// }
+
 async function convertHtmlToPdf(htmlContent) {
-  return new Promise((resolve, reject) => {
-    pdf.create(htmlContent).toBuffer((err, buffer) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(buffer);
-      }
-    });
-  });
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(htmlContent);
+  const pdfBuffer = await page.pdf();
+  await browser.close();
+  return pdfBuffer;
 }
