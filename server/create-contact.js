@@ -11,8 +11,8 @@ exports.handler = async (event, context) => {
   // Construct the request body for the Forth API call using the extracted data
   const forthRequestBody = {
     assigned_to: body.assigned_to,
-    first_name: body.contact.first_name,
-    last_name: body.contact.last_name,
+    first_name: body.first_name,
+    last_name: body.last_name,
     campaign_id: body.campaign_id,
     attorney_id: body.attorney_id,
     phone_number: body.phone_number,
