@@ -8,15 +8,6 @@ exports.handler = async (event, context) => {
   // Parse the incoming request body to extract contact data
   const body = JSON.parse(event.body);
 
-  // Ensure that required fields are provided, you can add more validation here
-  if (!body.first_name || !body.last_name || !body.phone_number || !body.address.address1 || !body.address.city || !body.address.state || !body.address.zip || !body.email || !body.date_of_birth) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Required fields are missing in the request' }),
-      headers: { 'Access-Control-Allow-Origin': '*' },
-    };
-  }
-
   // Construct the request body for the Forth API call using the extracted data
   const forthRequestBody = {
     assigned_to: body.assigned_to,
@@ -66,17 +57,29 @@ exports.handler = async (event, context) => {
   } catch (error) {
     console.error('Error:', error.message);
 
-    // Extract the error message from the error object if it exists
-    const errorMessage = error.status && error.status.message ? error.status.message : error.message;
+    // Check if the error is in the expected format (Forth's response)
+    if (error.status && error.status.code && error.status.message) {
+      // Extract the error message from the error object
+      const errorMessage = error.status.message;
 
-    // Format the error message
-    const formattedErrorMessage = errorMessage && typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage;
+      // Format the error message as needed
+      const formattedErrorMessage = {
+        error: errorMessage,
+      };
 
-    return {
-      statusCode: error.status && error.status.code ? error.status.code : 500,
-      body: JSON.stringify({ error: formattedErrorMessage }),
-      headers: { 'Access-Control-Allow-Origin': '*' },
-    };
+      return {
+        statusCode: error.status.code,
+        body: JSON.stringify(formattedErrorMessage),
+        headers: { 'Access-Control-Allow-Origin': '*' },
+      };
+    } else {
+      // If the error is not in the expected format, return a generic error message
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'An unexpected error occurred' }),
+        headers: { 'Access-Control-Allow-Origin': '*' },
+      };
+    }
   }
 };
 
@@ -106,4 +109,5 @@ function performHttpRequest(options, requestBody) {
     req.end();
   });
 }
+
 
