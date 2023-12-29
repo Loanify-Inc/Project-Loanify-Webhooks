@@ -52,12 +52,19 @@ function getStateAbbreviation(state) {
     washington: 'WA',
     westvirginia: 'WV',
     wisconsin: 'WI',
-    wyoming: 'WY',
+    wyoming: 'WY'
   };
 
-  // Convert the state to lowercase and get the abbreviation
-  const stateAbbreviation = state.toLowerCase();
-  return stateMap[stateAbbreviation] || '';
+  // Normalize input: Convert full state names to lowercase, and abbreviations to uppercase
+  let normalizedState = state.length > 2 ? state.toLowerCase() : state.toUpperCase();
+
+  // Return the uppercase abbreviation for full state names
+  if (normalizedState.length > 2) {
+    return stateMap[normalizedState] || '';
+  }
+
+  // Return the uppercase abbreviation directly for abbreviation inputs
+  return normalizedState;
 }
 
 // Function to format date of birth as "YYYY-MM-DD"
