@@ -4,7 +4,11 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "aws-sdk": "^2.1075.0",
     "axios": "^1.6.3",
+    "fs": "0.0.1-security",
+    "glob-parent": "^5.1.2",
+    "html-pdf": "^3.0.1",
     "netlify-lambda": "^2.0.16"
   },
   "scripts": {
