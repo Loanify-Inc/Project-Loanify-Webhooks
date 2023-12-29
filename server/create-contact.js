@@ -69,22 +69,30 @@ function getStateAbbreviation(state) {
 
 // Function to format date of birth as "YYYY-MM-DD"
 function formatDateOfBirth(dateOfBirth) {
-  // Try parsing the date in different formats
-  let parsedDate = new Date(dateOfBirth);
-  if (isNaN(parsedDate.getTime())) {
-    // Parsing failed, try another format
-    parsedDate = new Date(dateOfBirth.replace(/(\d{4})-(\d{2})-(\d{2})/, '$2/$3/$1'));
+  // Check if the date is already in the correct format "YYYY-MM-DD"
+  const isoRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (isoRegex.test(dateOfBirth)) {
+    return dateOfBirth; // Return as is if already in correct format
   }
 
-  // Check if parsing succeeded
-  if (!isNaN(parsedDate.getTime())) {
-    const year = parsedDate.getFullYear();
-    const month = (parsedDate.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
-    const day = parsedDate.getDate().toString().padStart(2, '0');
+  // Regular expression to match dates in the format "Month DDth YYYY"
+  const verboseRegex = /^(January|February|March|April|May|June|July|August|September|October|November|December)\s(\d{1,2})(?:st|nd|rd|th)\s(\d{4})$/;
+  const match = dateOfBirth.match(verboseRegex);
+
+  if (match) {
+    const monthNames = {
+      "January": "01", "February": "02", "March": "03", "April": "04", "May": "05", "June": "06",
+      "July": "07", "August": "08", "September": "09", "October": "10", "November": "11", "December": "12"
+    };
+
+    const month = monthNames[match[1]];
+    const day = match[2].padStart(2, '0');
+    const year = match[3];
+
     return `${year}-${month}-${day}`;
   }
 
-  // If parsing still failed, return an empty string
+  // If parsing failed, return an empty string
   return '';
 }
 
