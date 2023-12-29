@@ -69,9 +69,12 @@ exports.handler = async (event, context) => {
     // Extract the error message from the error object if it exists
     const errorMessage = error.status && error.status.message ? error.status.message : error.message;
 
+    // Format the error message
+    const formattedErrorMessage = errorMessage && typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage;
+
     return {
       statusCode: error.status && error.status.code ? error.status.code : 500,
-      body: JSON.stringify({ error: errorMessage }),
+      body: JSON.stringify({ error: formattedErrorMessage }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   }
@@ -103,3 +106,4 @@ function performHttpRequest(options, requestBody) {
     req.end();
   });
 }
+
