@@ -2,7 +2,8 @@ const https = require('https');
 const pdf = require('html-pdf');
 const fs = require('fs');
 const AWS = require('aws-sdk'); // Uncomment this line if using AWS S3
-const puppeteer = require('puppeteer');
+const chrome = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer-core');
 
 exports.handler = async (event, context) => {
   const API_KEY = process.env.API_KEY;
@@ -163,11 +164,26 @@ function generateFinancialReport(data) {
 //   });
 // }
 
+// async function convertHtmlToPdf(htmlContent) {
+//   const browser = await puppeteer.launch();
+//   const page = await browser.newPage();
+//   await page.setContent(htmlContent);
+//   const pdfBuffer = await page.pdf();
+//   await browser.close();
+//   return pdfBuffer;
+// }
+
 async function convertHtmlToPdf(htmlContent) {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: chrome.args,
+    executablePath: await chrome.executablePath,
+    headless: true,
+  });
+
   const page = await browser.newPage();
   await page.setContent(htmlContent);
   const pdfBuffer = await page.pdf();
+
   await browser.close();
   return pdfBuffer;
 }

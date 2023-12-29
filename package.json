@@ -10,7 +10,8 @@
     "glob-parent": "^5.1.2",
     "html-pdf": "^3.0.1",
     "netlify-lambda": "^2.0.16",
-    "puppeteer": "^21.6.1"
+    "chrome-aws-lambda": "^9.0.0",
+    "puppeteer-core": "^9.0.0"
   },
   "scripts": {
     "start": "./node_modules/.bin/netlify-lambda serve server",
