@@ -75,14 +75,16 @@ function formatDateOfBirth(dateOfBirth) {
     return dateOfBirth; // Return as is if already in correct format
   }
 
-  // Regular expression to match dates in the format "Month DDth YYYY"
-  const verboseRegex = /^(January|February|March|April|May|June|July|August|September|October|November|December)\s(\d{1,2})(?:st|nd|rd|th)\s(\d{4})$/;
+  // Regular expression to match dates in various formats
+  const verboseRegex = /^(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s(\d{1,2})(?:st|nd|rd|th)?\s(\d{4})$/;
   const match = dateOfBirth.match(verboseRegex);
 
   if (match) {
     const monthNames = {
       "January": "01", "February": "02", "March": "03", "April": "04", "May": "05", "June": "06",
-      "July": "07", "August": "08", "September": "09", "October": "10", "November": "11", "December": "12"
+      "July": "07", "August": "08", "September": "09", "October": "10", "November": "11", "December": "12",
+      "Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "Jun": "06", "Jul": "07", "Aug": "08",
+      "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12"
     };
 
     const month = monthNames[match[1]];
