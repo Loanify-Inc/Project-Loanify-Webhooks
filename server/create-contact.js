@@ -119,15 +119,15 @@ exports.handler = async (event, context) => {
   // Convert state name to capitalized abbreviation
   const stateAbbreviation = getStateAbbreviation(body.address.state);
 
-  // Check if the state is qualified
-  const isStateQualified = qualifiedStates.includes(stateAbbreviation);
+  // Check if the state is qualified and store the result as a string
+  const qualificationStatus = qualifiedStates.includes(stateAbbreviation) ? "Qualified" : "Not Qualified";
 
-  // If the state is not qualified, return immediately with isStateQualified set to false
-  if (!isStateQualified) {
+  // If the state is not qualified, return immediately
+  if (qualificationStatus === "Not Qualified") {
     return {
       statusCode: 200,
       body: JSON.stringify({
-        isStateQualified: isStateQualified,
+        isStateQualified: qualificationStatus,
         message: `State ${stateAbbreviation} is not qualified for processing.`
       }),
       headers: { 'Access-Control-Allow-Origin': '*' },
@@ -181,7 +181,7 @@ exports.handler = async (event, context) => {
     return {
       statusCode: 200,
       body: JSON.stringify({
-        isStateQualified: isStateQualified,
+        isStateQualified: qualificationStatus,
         message: 'API call to Forth successful',
         response: response
       }),
