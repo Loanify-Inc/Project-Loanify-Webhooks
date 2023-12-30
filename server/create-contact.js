@@ -122,13 +122,18 @@ exports.handler = async (event, context) => {
   // Check if the state is qualified and store the result as a string
   const qualificationStatus = qualifiedStates.includes(stateAbbreviation) ? "Qualified" : "Not Qualified";
 
-  // If the state is not qualified, return immediately
+  // If the state is not qualified, return a structured response with all null values
   if (qualificationStatus === "Not Qualified") {
     return {
       statusCode: 200,
       body: JSON.stringify({
         isStateQualified: qualificationStatus,
-        message: `State ${stateAbbreviation} is not qualified for processing.`
+        message: `State ${stateAbbreviation} is not qualified for processing.`,
+        response: {
+          response: {
+            id: null
+          }
+        }
       }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
