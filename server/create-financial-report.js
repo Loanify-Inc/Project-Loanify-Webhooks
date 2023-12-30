@@ -2,6 +2,19 @@ const axios = require('axios');
 
 exports.handler = async (event, context) => {
   // Your existing code...
+  // Extract data from the request object
+  const {
+    firstName,
+    lastName,
+    preparedBy,
+    creditScore,
+    redFlagCodes,
+    debts,
+    creditUtilization,
+    totalDebt,
+    currentSituation,
+    debtModificationProgram,
+  } = JSON.parse(event.body);
 
   try {
     // Make an API call to PDF service  
