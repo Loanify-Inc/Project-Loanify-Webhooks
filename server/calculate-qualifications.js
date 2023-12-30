@@ -44,9 +44,13 @@ exports.handler = async (event, context) => {
 
     const debtDetails = debts
       .filter(debt => {
+        // Check if the debt amount is greater than or equal to $500
+        const isDebtAmountValid = parseFloat(debt.current_debt_amount) >= 500;
+
         // Extract the allowed debt type from the notes
         const debtType = allowedDebtTypes.find(type => debt.notes.includes(type));
-        return !!debtType;
+
+        return isDebtAmountValid && !!debtType;
       })
       .map(debt => ({
         accountNumber: debt.og_account_num, // Use og_account_num as accountNumber
