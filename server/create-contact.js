@@ -99,6 +99,15 @@ function formatDateOfBirth(dateOfBirth) {
   return '';
 }
 
+// List of qualified states
+const qualifiedStates = [
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'DE', 'GA', 'ID', 'IL',
+  'IA', 'LA', 'MA', 'NV', 'NJ', 'OH', 'PA', 'PR', 'RI', 'TN',
+  'UT', 'VA', 'WI', 'WY', 'FL', 'IN', 'KY', 'ME', 'MD', 'MI',
+  'MN', 'MS', 'MO', 'MT', 'NE', 'NH', 'NM', 'NY', 'NC', 'OK',
+  'SD', 'TX', 'DC'
+];
+
 exports.handler = async (event, context) => {
   const API_KEY = '0db948a6-50f1-d9f3-4579-4f8036dc3830';
   const BASE_URL = 'api.forthcrm.com';
@@ -109,6 +118,21 @@ exports.handler = async (event, context) => {
 
   // Convert state name to capitalized abbreviation
   const stateAbbreviation = getStateAbbreviation(body.address.state);
+
+  // Check if the state is qualified
+  const isStateQualified = qualifiedStates.includes(stateAbbreviation);
+
+  // If the state is not qualified, return immediately with isStateQualified set to false
+  if (!isStateQualified) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        isStateQualified: isStateQualified,
+        message: `State ${stateAbbreviation} is not qualified for processing.`
+      }),
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    };
+  }
 
   // Format date of birth as "year-month-day"
   const formattedDateOfBirth = formatDateOfBirth(body.date_of_birth);
@@ -156,7 +180,11 @@ exports.handler = async (event, context) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'API call to Forth successful', response }),
+      body: JSON.stringify({
+        isStateQualified: isStateQualified,
+        message: 'API call to Forth successful',
+        response: response
+      }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   } catch (error) {
