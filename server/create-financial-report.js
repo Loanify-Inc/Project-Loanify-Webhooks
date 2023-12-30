@@ -1,4 +1,4 @@
-const axios = require('axios');
+const axios = require('axios').default;
 
 exports.handler = async (event, context) => {
   // Your existing code...
