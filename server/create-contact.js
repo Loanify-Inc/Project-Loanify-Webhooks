@@ -41,6 +41,7 @@ function getStateAbbreviation(state) {
     oklahoma: 'OK',
     oregon: 'OR',
     pennsylvania: 'PA',
+    puertorico: 'PR',
     rhodeisland: 'RI',
     southcarolina: 'SC',
     southdakota: 'SD',
