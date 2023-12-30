@@ -34,7 +34,6 @@ exports.handler = async (event, context) => {
       'CreditCard',
       'Unsecured',
       'CheckCreditOrLineOfCredit',
-      'Automobile',
       'Collection',
       'MedicalDebt',
       'ChargeAccount',
