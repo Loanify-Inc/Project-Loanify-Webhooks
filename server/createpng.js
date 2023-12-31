@@ -16,7 +16,9 @@ exports.handler = async (event, context) => {
   const payload = JSON.parse(event.body);
 
   // Generate HTML from EJS template
-  const templatePath = './template.ejs';
+  const path = require('path');
+
+  const templatePath = path.resolve(__dirname, 'template.ejs');
   const html = ejs.render(fs.readFileSync(templatePath, 'utf-8'), { payload });
 
   // Convert HTML to PNG using html2canvas
