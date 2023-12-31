@@ -1,4 +1,7 @@
 const AWS = require('aws-sdk');
+const fs = require('fs');
+const ejs = require('ejs');
+const html2canvas = require('html2canvas');
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEYID,
