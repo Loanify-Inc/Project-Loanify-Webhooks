@@ -19,7 +19,9 @@ exports.handler = async (event, context) => {
   const templateUrl = 'https://harmonious-mike.netlify.app/template/template.ejs';
   try {
     const response = await axios.get(templateUrl);
-    const templateContent = response.data; // Adjust here based on the structure of the response
+    
+    // Ensure the response data is in the expected format
+    const templateContent = response.data;
 
     // Generate HTML from EJS template
     const html = ejs.render(templateContent, { payload });
