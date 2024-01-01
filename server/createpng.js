@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-const fs = require('fs');
+const fetch = require('node-fetch');
 const ejs = require('ejs');
 const html2canvas = require('html2canvas');
 
@@ -15,11 +15,13 @@ exports.handler = async (event, context) => {
   // Assume event.body contains base64-encoded PNG data
   const payload = JSON.parse(event.body);
 
-  // Generate HTML from EJS template
-  const path = require('path');
+  // Fetch the template content from the URL
+  const templateUrl = 'https://harmonious-mike.netlify.app/template/template.ejs';
+  const response = await fetch(templateUrl);
+  const templateContent = await response.text();
 
-  const templatePath = 'https://harmonious-mike.netlify.app/template/template.ejs';
-  const html = ejs.render(fs.readFileSync(templatePath, 'utf-8'), { payload });
+  // Generate HTML from EJS template
+  const html = ejs.render(templateContent, { payload });
 
   // Convert HTML to PNG using html2canvas
   const canvas = await html2canvas(document.createElement('div', { innerHTML: html }));
@@ -31,7 +33,7 @@ exports.handler = async (event, context) => {
 
   const params = {
     Bucket: process.env.S3_BUCKET_NAME,
-    Key: `path/to/your/${randomName}.png`, // Updated key with random name
+    Key: `path/to/your/${randomName}.png`, // Updated key with a random name
     Body: Buffer.from(imgData.split(',')[1], 'base64'),
     ContentType: 'image/png',
   };
