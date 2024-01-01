@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-const fetch = require('node-fetch');
+const axios = require('axios');
 const ejs = require('ejs');
 const html2canvas = require('html2canvas');
 
@@ -15,10 +15,9 @@ exports.handler = async (event, context) => {
   // Assume event.body contains base64-encoded PNG data
   const payload = JSON.parse(event.body);
 
-  // Fetch the template content from the URL
+  // Fetch the template content from the URL using axios
   const templateUrl = 'https://harmonious-mike.netlify.app/template/template.ejs';
-  const response = await fetch(templateUrl);
-  const templateContent = await response.text();
+  const { data: templateContent } = await axios.get(templateUrl);
 
   // Generate HTML from EJS template
   const html = ejs.render(templateContent, { payload });
