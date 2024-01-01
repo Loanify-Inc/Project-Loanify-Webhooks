@@ -17,32 +17,33 @@ exports.handler = async (event, context) => {
 
   // Fetch the template content from the URL using axios
   const templateUrl = 'https://harmonious-mike.netlify.app/template/template.ejs';
-  const { data: templateContent } = await axios.get(templateUrl);
-
-  // Generate HTML from EJS template
-  const html = ejs.render(templateContent, { payload });
-
-  // Convert HTML to PNG using html2canvas
-  const canvas = await html2canvas(document.createElement('div', { innerHTML: html }));
-  const imgData = canvas.toDataURL('image/png');
-
-  // Generate a random name with a timestamp
-  const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
-  const randomName = `image_${timestamp}_${Math.random().toString(36).substring(2, 8)}`;
-
-  const params = {
-    Bucket: process.env.S3_BUCKET_NAME,
-    Key: `path/to/your/${randomName}.png`, // Updated key with a random name
-    Body: Buffer.from(imgData.split(',')[1], 'base64'),
-    ContentType: 'image/png',
-  };
-
   try {
-    const data = await s3.upload(params).promise();
-    console.log('Image uploaded successfully:', data.Location);
+    const response = await axios.get(templateUrl);
+    const templateContent = response.data; // Adjust here based on the structure of the response
+
+    // Generate HTML from EJS template
+    const html = ejs.render(templateContent, { payload });
+
+    // Convert HTML to PNG using html2canvas
+    const canvas = await html2canvas(document.createElement('div', { innerHTML: html }));
+    const imgData = canvas.toDataURL('image/png');
+
+    // Generate a random name with a timestamp
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, '');
+    const randomName = `image_${timestamp}_${Math.random().toString(36).substring(2, 8)}`;
+
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: `path/to/your/${randomName}.png`, // Updated key with a random name
+      Body: Buffer.from(imgData.split(',')[1], 'base64'),
+      ContentType: 'image/png',
+    };
+
+    const uploadResult = await s3.upload(params).promise();
+    console.log('Image uploaded successfully:', uploadResult.Location);
     return { statusCode: 200, body: JSON.stringify({ success: true, message: 'Image uploaded successfully' }) };
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('Error:', error.message);
     return { statusCode: 500, body: JSON.stringify({ error: 'Internal Server Error' }) };
   }
 };
