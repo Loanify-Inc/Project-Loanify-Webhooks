@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const fetch = require('node-fetch');
+const https = require('https');  // Use the https module
 
 // Function to create financial report and trigger webhook
 exports.handler = async (event, context) => {
@@ -18,36 +18,52 @@ exports.handler = async (event, context) => {
       currentSituation,
       debtModificationProgram,
     } = JSON.parse(event.body);
-  
-    // Add your logic to process the extracted data and construct the response object
+
     const processedData = {
-      firstName,
-      lastName,
-      preparedBy,
-      creditScore,
-      redFlagCodes,
-      debts,
-      creditUtilization,
-      totalDebt,
-      currentSituation,
-      debtModificationProgram,
-      // Add other processed data as needed
+      // ... your existing processed data
     };
 
-    // Save the data to a file in the /tmp directory
     const tempDir = os.tmpdir();
     const filePath = path.join(tempDir, 'financial-report.json');
     fs.writeFileSync(filePath, JSON.stringify(processedData));
 
-    // Trigger the /receive-financial-report function with a webhook using fetch
+    // Function to send a POST request using https module
+    const sendWebhook = (url, data) => {
+      return new Promise((resolve, reject) => {
+        const parsedUrl = new URL(url);
+        const options = {
+          hostname: parsedUrl.hostname,
+          path: parsedUrl.pathname,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        };
+
+        const req = https.request(options, (res) => {
+          res.setEncoding('utf8');
+          let responseBody = '';
+
+          res.on('data', (chunk) => {
+            responseBody += chunk;
+          });
+
+          res.on('end', () => {
+            resolve(responseBody);
+          });
+        });
+
+        req.on('error', (error) => {
+          reject(error);
+        });
+
+        req.write(JSON.stringify(data));
+        req.end();
+      });
+    };
+
     const webhookUrl = 'https://harmonious-mike.netlify.app/.netlify/functions/receive-financial-report';
-    await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ processedData }),
-    });
+    await sendWebhook(webhookUrl, { processedData });
 
     console.log('Webhook sent successfully');
 
