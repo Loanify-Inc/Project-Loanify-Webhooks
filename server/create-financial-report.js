@@ -1,5 +1,4 @@
 const fs = require('fs');
-const axios = require('axios');
 const path = require('path');
 const os = require('os');
 
@@ -34,19 +33,21 @@ exports.handler = async (event, context) => {
       // Add other processed data as needed
     };
 
-    // const data = {
-    //   // ... (Generated financial report data)
-    // };
-
     // Save the data to a file in the /tmp directory
     const tempDir = os.tmpdir();
     const filePath = path.join(tempDir, 'financial-report.json');
     fs.writeFileSync(filePath, JSON.stringify(processedData));
 
-    // Trigger the /receive-financial-report function with a webhook
+    // Trigger the /receive-financial-report function with a webhook using fetch
     const webhookUrl = 'https://harmonious-mike.netlify.app/.netlify/functions/receive-financial-report';
-    await axios.post(webhookUrl, { processedData });
-    
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ processedData }),
+    });
+
     console.log('Webhook sent successfully');
 
     return {
