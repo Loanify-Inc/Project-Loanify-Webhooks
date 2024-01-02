@@ -97,7 +97,7 @@ exports.handler = async (event, context) => {
                         </tr>
                         <tr>
                           <td colspan="5" style="font-size:40px; font-weight: 700; color:#1E1E1E; line-height: 150%;" align="center">
-                            <%= payload.lastName %>
+                            <%= payload.creditScore %>
                           </td>
                         </tr>
                         <tr>
@@ -577,10 +577,18 @@ exports.handler = async (event, context) => {
 
     const uploadResult = await s3.upload(s3Params).promise();
 
-    return {
+    // Prepare the response object
+    const response = {
       statusCode: 200,
       body: JSON.stringify({ success: true, message: 'File uploaded to S3 successfully', url: uploadResult.Location }),
     };
+
+    // Log the response to the console
+    console.log('Response:', response);
+
+    // Return the response
+    return response;
+
   } catch (error) {
     console.error('Error:', error.message);
     return {
