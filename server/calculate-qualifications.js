@@ -107,11 +107,3 @@ function performHttpRequest(options) {
     req.end();
   });
 }
-
-
-
-
-
-
-
-

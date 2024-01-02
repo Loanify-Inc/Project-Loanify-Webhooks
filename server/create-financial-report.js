@@ -16,6 +16,34 @@ exports.handler = async (event, context) => {
   try {
     const payload = JSON.parse(event.body);
 
+    /*body: JSON.stringify({
+      firstName: "Boomer",
+      lastName: "Baker",
+      preparedBy: "Kevin Kullins",
+      creditScore: "700",
+      preparedBy: "Kevin Kullins",
+      redFlagCodes: [
+        { code: "1", description: "Not good" },
+        { code: "2", description: "Not good" },
+        { code: "3", description: "Not good" }
+      ],
+      debts: debtDetails,
+      creditUtilization: "90",
+      totalDebt: totalDebt,
+      status: status,
+      currentSituation: {
+        monthlyPayment: "970",
+        payoffTime: "148",
+        interestCost: "128,482",
+        totalCost: "161,172"
+      },
+      debtModificationProgram: {
+        monthlyPayment: "562",
+        payoffTime: "42",
+        interestCost: "0",
+        totalCost: "23,591"
+      }*/
+
     // Define your HTML template (Can be externalized as well)
     const htmlTemplate = `
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
