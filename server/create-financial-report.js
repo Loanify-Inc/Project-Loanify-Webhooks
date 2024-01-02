@@ -20,7 +20,16 @@ exports.handler = async (event, context) => {
     } = JSON.parse(event.body);
 
     const processedData = {
-      // ... your existing processed data
+      firstName,
+      lastName,
+      preparedBy,
+      creditScore,
+      redFlagCodes,
+      debts,
+      creditUtilization,
+      totalDebt,
+      currentSituation,
+      debtModificationProgram,     
     };
 
     const tempDir = os.tmpdir();
