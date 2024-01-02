@@ -140,7 +140,7 @@ exports.handler = async (event, context) => {
       }),
       debts: debtDetails,
       creditUtilization: creditReport.revolvingCreditUtilization,
-      totalDebt: totalDebtNumber,
+      totalDebt: totalDebtNumber.toFixed(2),
       currentSituation: {
         monthlyPayment: monthly_payment.toFixed(2),
         payoffTime: payoff_time_months,
