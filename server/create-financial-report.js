@@ -45,7 +45,7 @@ exports.handler = async (event, context) => {
 
     // Trigger the /receive-financial-report function with a webhook
     const webhookUrl = 'https://harmonious-mike.netlify.app/.netlify/functions/receive-financial-report';
-    await axios.post(webhookUrl, { data });
+    await axios.post(webhookUrl, { processedData });
     
     console.log('Webhook sent successfully');
 
