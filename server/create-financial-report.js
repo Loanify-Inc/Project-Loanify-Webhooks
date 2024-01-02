@@ -19,12 +19,19 @@ const createFinancialReport = async () => {
 
     // Trigger the /receive-financial-report function with a webhook
     const webhookUrl = 'https://harmonious-mike.netlify.app/.netlify/functions/receive-financial-report';
-    await axios.post(webhookUrl, { filePath });
+    await axios.post(webhookUrl, { data });
+    
     console.log('Webhook sent successfully');
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true, message: 'Webhook sent successfully' }),
+    };
   } catch (error) {
     console.error('Error:', error.message);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Internal Server Error' }),
+    };
   }
 };
-
-// Invoke the function
-createFinancialReport();
