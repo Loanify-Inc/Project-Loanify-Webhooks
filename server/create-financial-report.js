@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const fetch = require('node-fetch');
 
 // Function to create financial report and trigger webhook
 exports.handler = async (event, context) => {
