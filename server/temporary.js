@@ -40,9 +40,9 @@ exports.handler = async (event, context) => {
         const [code, description] = factor.split(" - ", 2);
         return { code: code.trim(), description: description.trim() };
       }),
-      debts: debtDetails, // from your existing code
+      debts: "debtDetails", // from your existing code
       creditUtilization: creditReport.revolvingCreditUtilization,
-      totalDebt: totalDebt, // from your existing code
+      totalDebt: "totalDebt", // from your existing code
       currentSituation: {
         monthlyPayment: "970",
         payoffTime: "148",
