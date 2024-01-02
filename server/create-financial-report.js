@@ -409,7 +409,7 @@ exports.handler = async (event, context) => {
                         </p>
                         <h1 style="font-size:20px;line-height:32px;font-weight:600;margin-bottom:20px;">Utilization Rates and Why They Matter</h1>
                         <p style="text-align:left;margin-bottom:30px;">
-                          The ratio of your available credit compared to the balance owed determines your utilization rate. Your current utilization rate is <span style="font-weight:700;color:#0B72F1;"><%= payload.totalDebt %></span>. Lenders view any ratio over 30% to be high and as a result the consumer to be a potential lending risk.<br/><br/>
+                          The ratio of your available credit compared to the balance owed determines your utilization rate. Your current utilization rate is <span style="font-weight:700;color:#0B72F1;"><%= payload.creditUtilization %></span>. Lenders view any ratio over 30% to be high and as a result the consumer to be a potential lending risk.<br/><br/>
                           The utilization rate is by far the most influential factor in determining your credit score. A high credit utilization rate drastically reduces your creditworthiness and creditors can lower your credit limit, increase your interest rates and/or close your account, even in spite of excellent payment history. Prolonged periods of high credit utilization rates negatively impacts your credit score and increases the likelihood of future credit applications being declined.
                         </p>
                         <h1 style="font-size:20px;line-height:32px;font-weight:600;margin-bottom:20px;">Solution</h1>
