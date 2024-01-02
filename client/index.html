@@ -3,34 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HTML to PNG Example</title>
+  <title>Home</title>
   <!-- Include html2canvas -->
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 </head>
 <body>
-  <h1>Hello, World!</h1>
-
-  <!-- Add a button to trigger the conversion and upload -->
-  <button onclick="convertAndUpload()">Convert and Upload</button>
-
-  <!-- Add a script to handle the conversion and upload -->
-  <script>
-    function convertAndUpload() {
-      html2canvas(document.body).then(function(canvas) {
-        var imgData = canvas.toDataURL('image/png');
-        // Send the base64-encoded PNG data to the serverless function
-        fetch('/.netlify/functions/createImage', {
-          method: 'POST',
-          body: JSON.stringify({ body: imgData }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error(error));
-      });
-    }
-  </script>
+  <h1>Home</h1>
 </body>
 </html>
