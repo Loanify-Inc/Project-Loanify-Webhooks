@@ -42,31 +42,63 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // Get credit report
-    const creditReportResponse = await performHttpRequest({
-      hostname: BASE_URL,
-      path: `/v1/contacts/${contactId}/get_credit_report`,
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'API-Key': API_KEY,
-      },
-    });
+    // Fetch credit report, contact information, and debts in parallel
+    const [creditReportResponse, contactResponse, debtResponse] = await Promise.all([
+      performHttpRequest({
+        hostname: BASE_URL,
+        path: `/v1/contacts/${contactId}/get_credit_report`,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'API-Key': API_KEY,
+        },
+      }),
+      performHttpRequest({
+        hostname: BASE_URL,
+        path: `/v1/contacts/${contactId}`,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'API-Key': API_KEY,
+        },
+      }),
+      performHttpRequest({
+        hostname: BASE_URL,
+        path: `/v1/contacts/${contactId}/debts/enrolled`,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'API-Key': API_KEY,
+        },
+      })
+    ]);
+
+    // Process responses
     const creditReport = JSON.parse(creditReportResponse).response.report;
-
-    // Get contact information
-    const contactResponse = await performHttpRequest({
-      hostname: BASE_URL,
-      path: `/v1/contacts/${contactId}`,
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'API-Key': API_KEY,
-      },
-    });
     const contactInfo = JSON.parse(contactResponse).response;
+    const debts = JSON.parse(debtResponse).response;
 
-    // Define the payload object with data from the responses
+    // Process debts
+    const allowedDebtTypes = [
+      'CreditCard', 'Unsecured', 'CheckCreditOrLineOfCredit', 'Collection',
+      'MedicalDebt', 'ChargeAccount', 'Recreational', 'NoteLoan', 'InstallmentLoan'
+    ];
+
+    const debtDetails = debts
+      .filter(debt => parseFloat(debt.current_debt_amount) >= 500 &&
+        allowedDebtTypes.some(type => debt.notes.includes(type)))
+      .map(debt => ({
+        accountNumber: debt.og_account_num,
+        companyName: debt.creditor.company_name,
+        individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
+        debtType: allowedDebtTypes.find(type => debt.notes.includes(type))
+      }));
+
+    const totalDebt = debtDetails
+      .reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0)
+      .toFixed(2);
+
+    // Define the payload object
     const payload = {
       firstName: contactInfo.first_name,
       lastName: contactInfo.last_name,
@@ -76,9 +108,9 @@ exports.handler = async (event, context) => {
         const [code, description] = factor.split(" - ", 2);
         return { code: code.trim(), description: description.trim() };
       }),
-      debts: "debtDetails", // from your existing code
+      debts: debtDetails,
       creditUtilization: creditReport.revolvingCreditUtilization,
-      totalDebt: "totalDebt", // from your existing code
+      totalDebt: totalDebt,
       currentSituation: {
         monthlyPayment: "970",
         payoffTime: "148",
