@@ -98,6 +98,20 @@ exports.handler = async (event, context) => {
       .reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0)
       .toFixed(2);
 
+    // Current Situation Calculation (Assuming 24% interest rate, 10 year term)
+    const annual_interest_rate = 0.24; // 24%
+    const monthly_interest_rate = annual_interest_rate / 12;
+    const payoff_time_months = 120; // 10 years
+    const monthly_payment = totalDebt * (monthly_interest_rate * (1 + monthly_interest_rate) ** payoff_time_months) / ((1 + monthly_interest_rate) ** payoff_time_months - 1);
+    const total_interest_cost = (monthly_payment * payoff_time_months) - totalDebt;
+    const total_cost = totalDebt + total_interest_cost;
+
+    // Debt Modification Program Calculation (Half of total debt, no interest, payoff time adjusted to keep payment ~half of current situation)
+    const modified_total_debt = totalDebt / 2;
+    const modified_monthly_payment_approx = monthly_payment / 2;
+    let modified_payoff_time_months = Math.min(Math.round(modified_total_debt / modified_monthly_payment_approx), 60);
+    const exact_modified_monthly_payment = modified_total_debt / modified_payoff_time_months;
+
     // Define the payload object
     const payload = {
       firstName: contactInfo.first_name,
@@ -112,16 +126,16 @@ exports.handler = async (event, context) => {
       creditUtilization: creditReport.revolvingCreditUtilization,
       totalDebt: totalDebt,
       currentSituation: {
-        monthlyPayment: "970",
-        payoffTime: "148",
-        interestCost: "128,482",
-        totalCost: "161,172"
+        monthlyPayment: monthly_payment.toFixed(2),
+        payoffTime: payoff_time_months,
+        interestCost: total_interest_cost.toFixed(2),
+        totalCost: total_cost.toFixed(2)
       },
       debtModificationProgram: {
-        monthlyPayment: "562",
-        payoffTime: "42",
-        interestCost: "0",
-        totalCost: "23,591"
+        monthlyPayment: exact_modified_monthly_payment.toFixed(2),
+        payoffTime: modified_payoff_time_months,
+        interestCost: "0.00",
+        totalCost: modified_total_debt.toFixed(2)
       }
     };
 
