@@ -104,17 +104,24 @@ exports.handler = async (event, context) => {
       throw new Error('Total debt is not a valid number');
     }
 
-    // Current Situation Calculation (Assuming 24% interest rate, 10 year term)
+    // Current Situation Calculation
     const annual_interest_rate = 0.24; // 24%
     const monthly_interest_rate = annual_interest_rate / 12;
     const payoff_time_months = 120; // 10 years
-    const monthly_payment = totalDebt * (monthly_interest_rate * (1 + monthly_interest_rate) ** payoff_time_months) / ((1 + monthly_interest_rate) ** payoff_time_months - 1);
-    const total_interest_cost = (monthly_payment * payoff_time_months) - totalDebt;
-    const total_cost = totalDebt + total_interest_cost;
 
-    // Ensure monthly_payment, total_interest_cost, and total_cost are numbers
-    if (isNaN(monthly_payment) || isNaN(total_interest_cost) || isNaN(total_cost)) {
+    let monthly_payment, total_interest_cost, total_cost;
+    try {
+      monthly_payment = totalDebtNumber * (monthly_interest_rate * (1 + monthly_interest_rate) ** payoff_time_months) / ((1 + monthly_interest_rate) ** payoff_time_months - 1);
+      total_interest_cost = (monthly_payment * payoff_time_months) - totalDebtNumber;
+      total_cost = totalDebtNumber + total_interest_cost;
+    } catch (calcError) {
+      console.error('Calculation error in current situation:', calcError.message);
       throw new Error('Error in calculating current situation');
+    }
+
+    // Check for NaN in calculated values
+    if (isNaN(monthly_payment) || isNaN(total_interest_cost) || isNaN(total_cost)) {
+      throw new Error('Calculated value is NaN in current situation');
     }
 
     // Debt Modification Program Calculation (Half of total debt, no interest, payoff time adjusted to keep payment ~half of current situation)
