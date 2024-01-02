@@ -14,26 +14,62 @@ exports.handler = async (event, context) => {
     };
   }
 
-  const API_PATH = `/v1/contacts/${contactId}/get_credit_report`;
-  const options = {
-    hostname: BASE_URL,
-    path: API_PATH,
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'API-Key': API_KEY,
-    },
-  };
+  // Function to perform HTTP requests
+  function performHttpRequest(options) {
+    return new Promise((resolve, reject) => {
+      const req = https.request(options, (res) => {
+        let data = '';
+
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        res.on('end', () => {
+          if (res.statusCode === 200) {
+            resolve(data);
+          } else {
+            reject({ statusCode: res.statusCode, message: data });
+          }
+        });
+      });
+
+      req.on('error', (error) => {
+        reject({ statusCode: 500, message: error.message });
+      });
+
+      req.end();
+    });
+  }
 
   try {
-    const response = await performHttpRequest(options);
-    const creditReport = JSON.parse(response).response.report;
+    // Get credit report
+    const creditReportResponse = await performHttpRequest({
+      hostname: BASE_URL,
+      path: `/v1/contacts/${contactId}/get_credit_report`,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'API-Key': API_KEY,
+      },
+    });
+    const creditReport = JSON.parse(creditReportResponse).response.report;
 
-    // Define the payload object with data from the response
+    // Get contact information
+    const contactResponse = await performHttpRequest({
+      hostname: BASE_URL,
+      path: `/v1/contacts/${contactId}`,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'API-Key': API_KEY,
+      },
+    });
+    const contactInfo = JSON.parse(contactResponse).response;
+
+    // Define the payload object with data from the responses
     const payload = {
-      // Assuming other fields like firstName, lastName, etc. are static or from another source
-      firstName: "Boomer",
-      lastName: "Baker",
+      firstName: contactInfo.first_name,
+      lastName: contactInfo.last_name,
       preparedBy: "Kevin Kullins",
       creditScore: creditReport.scoreModels.Equifax.score,
       redFlagCodes: creditReport.scoreModels.Equifax.factors.map(factor => {
@@ -71,30 +107,3 @@ exports.handler = async (event, context) => {
     };
   }
 };
-
-function performHttpRequest(options) {
-  return new Promise((resolve, reject) => {
-    const req = https.request(options, (res) => {
-      let data = '';
-
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      res.on('end', () => {
-        if (res.statusCode === 200) {
-          resolve(data);
-        } else {
-          reject({ statusCode: res.statusCode, message: data });
-        }
-      });
-    });
-
-    req.on('error', (error) => {
-      reject({ statusCode: 500, message: error.message });
-    });
-
-    req.end();
-  });
-};
-
