@@ -187,9 +187,12 @@ exports.handler = async (event, context) => {
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
           <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
           <title>Loanify</title>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
           
         </head>
         <body style="margin:0;background-color:#cccccc;font-family:'Poppins', sans-serif;color:#222D38;">
+        <div id="content" style="width: auto; height: auto;">
           <center style="width:100%;table-layout:fixed;background-color:#cccccc;">
             <table width="100%" style="background-color:#ffffff;margin:0 auto;width:100%;max-width:500px;border-spacing:0;padding:10px 0px;">
               <!--=======================Row=======================-->
@@ -714,6 +717,67 @@ exports.handler = async (event, context) => {
               </tr>
             </table>
           </center>
+          </div>
+          //Adding button to download the PDF
+          <button onclick="generatePDF()" style="position: fixed; right: 20%; top: 10px;">Download PDF</button>
+          
+          //Adding page onload download the PDF            
+          <script>
+            window.onload = async function() {
+                const content = document.getElementById('content');
+                const canvas = await html2canvas(content);
+                const imgData = canvas.toDataURL('image/png');
+
+                // Get the dimensions of the rendered content
+                const contentWidth = canvas.width;
+                const contentHeight = canvas.height;
+
+                // Create a PDF with the same dimensions (or scaled dimensions)
+                const pdf = new jspdf.jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: [contentWidth, contentHeight]
+                });
+
+                // Add the image to the PDF at full size
+                pdf.addImage(imgData, 'PNG', 0, 0, contentWidth, contentHeight);
+
+                // Generate file name from URL or other data
+                const filename = 'PDF_' + new Date().toISOString() + '.pdf';
+
+                // Save the PDF
+                pdf.save(filename);
+            }
+            </script>
+
+            //Adding download button the PDF 
+            <script>
+                async function generatePDF() {
+                    const content = document.getElementById('content');
+                    const canvas = await html2canvas(content);
+                    const imgData = canvas.toDataURL('image/png');
+
+                    // Get the dimensions of the rendered content
+                    const contentWidth = canvas.width;
+                    const contentHeight = canvas.height;
+
+                    // Create a PDF with the same dimensions (or scaled dimensions)
+                    const pdf = new jspdf.jsPDF({
+                        orientation: 'portrait',
+                        unit: 'px',
+                        format: [contentWidth, contentHeight]
+                    });
+
+                  // Add the image to the PDF at full size
+                    pdf.addImage(imgData, 'PNG', 0, 0, contentWidth, contentHeight);
+
+                  // Generate file name from URL or other data
+                    const filename = 'PDF_' + new Date().toISOString() + '.pdf';
+
+                  // Save the PDF
+                    pdf.save(filename);
+                }
+            </script>
         </body>
       </html>
     `;
