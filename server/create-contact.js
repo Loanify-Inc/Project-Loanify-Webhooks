@@ -109,7 +109,7 @@ const qualifiedStates = [
 ];
 
 exports.handler = async (event, context) => {
-  const API_KEY = '0db948a6-50f1-d9f3-4579-4f8036dc3830';
+  const API_KEY = process.env.API_KEY;
   const BASE_URL = 'api.forthcrm.com';
   const API_PATH = '/v1/contacts';
 
