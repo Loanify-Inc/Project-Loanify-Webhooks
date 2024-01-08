@@ -23,7 +23,7 @@ function determinePayoffTime(totalDebt, numOfAccounts) {
   if (totalDebt >= 15000) return 42;
   if (totalDebt >= 10000) return 36;
 
-  return 60; // Default to 60 if below 10000 (or as per your business logic)
+  return 36; // Default to 36 if below 10000 (or as per your business logic)
 }
 
 exports.handler = async (event, context) => {
