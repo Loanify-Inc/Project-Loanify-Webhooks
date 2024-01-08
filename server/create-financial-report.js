@@ -13,6 +13,19 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
+// Function to determine the modified payoff time
+function determinePayoffTime(totalDebt, numOfAccounts) {
+  if (numOfAccounts === 1) return 24; // Max term of 24 months for a single account
+
+  if (totalDebt >= 60000) return 60;
+  if (totalDebt >= 35000) return 54;
+  if (totalDebt >= 20000) return 48;
+  if (totalDebt >= 15000) return 42;
+  if (totalDebt >= 10000) return 36;
+
+  return 60; // Default to 60 if below 10000 (or as per your business logic)
+}
+
 exports.handler = async (event, context) => {
   try {
     const API_KEY = process.env.API_KEY;
@@ -137,10 +150,18 @@ exports.handler = async (event, context) => {
       throw new Error('Calculated value is NaN in current situation');
     }
 
-    // Debt Modification Program Calculation (Half of total debt, no interest, payoff time adjusted to keep payment ~half of current situation)
-    const modified_total_debt = totalDebt / 2;
-    const modified_monthly_payment_approx = monthly_payment / 2;
-    let modified_payoff_time_months = Math.min(Math.round(modified_total_debt / modified_monthly_payment_approx), 60);
+    // Debt Modification Program Calculation with 25% negotiation fee
+    const half_total_debt = totalDebtNumber / 2;
+    const negotiation_fee = half_total_debt * 0.25; // 25% fee
+    const modified_total_debt = half_total_debt + negotiation_fee;
+
+    // Determine the number of accounts
+    const numOfAccounts = debtDetails.length;
+
+    // Use the determinePayoffTime function to get the modified payoff time
+    const modified_payoff_time_months = determinePayoffTime(modified_total_debt, numOfAccounts);
+
+    // Calculate the exact modified monthly payment
     const exact_modified_monthly_payment = modified_total_debt / modified_payoff_time_months;
 
     // Ensure exact_modified_monthly_payment and modified_total_debt are numbers
