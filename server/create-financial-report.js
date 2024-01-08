@@ -150,10 +150,8 @@ exports.handler = async (event, context) => {
       throw new Error('Calculated value is NaN in current situation');
     }
 
-    // Debt Modification Program Calculation with 25% negotiation fee
-    const half_total_debt = totalDebtNumber / 2;
-    const negotiation_fee = half_total_debt * 0.25; // 25% fee
-    const modified_total_debt = half_total_debt + negotiation_fee;
+    // Debt Modification Program Calculation with 25% reduction
+    const modified_total_debt = totalDebtNumber * 0.75; // 25% reduction
 
     // Determine the number of accounts
     const numOfAccounts = debtDetails.length;
