@@ -157,7 +157,7 @@ exports.handler = async (event, context) => {
     const numOfAccounts = debtDetails.length;
 
     // Use the determinePayoffTime function to get the modified payoff time
-    const modified_payoff_time_months = determinePayoffTime(modified_total_debt, numOfAccounts);
+    const modified_payoff_time_months = determinePayoffTime(totalDebtNumber, numOfAccounts);
 
     // Calculate the exact modified monthly payment
     const exact_modified_monthly_payment = modified_total_debt / modified_payoff_time_months;
