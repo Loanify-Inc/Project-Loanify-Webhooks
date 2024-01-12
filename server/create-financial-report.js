@@ -130,23 +130,42 @@ exports.handler = async (event, context) => {
       throw new Error('Total debt is not a valid number');
     }
 
+    // Calculate Total Monthly Payment
+    const totalMonthlyPayment = debts
+      .filter(debt => parseFloat(debt.current_debt_amount) >= 500 &&
+        allowedDebtTypes.some(type => debt.notes.includes(type)))
+      .reduce((acc, debt) => acc + parseFloat(debt.current_payment), 0)
+      .toFixed(2);
+
+    // Ensure totalMonthlyPayment is a number
+    const totalMonthlyPaymentNumber = Number(totalMonthlyPayment);
+    if (isNaN(totalMonthlyPaymentNumber)) {
+      throw new Error('Total monthly payment is not a valid number');
+    }
+
     // Current Situation Calculation
     const annual_interest_rate = 0.24; // 24%
     const monthly_interest_rate = annual_interest_rate / 12;
     const payoff_time_months = 120; // 10 years
 
-    let monthly_payment, total_interest_cost, total_cost;
+    let monthly_payment;
     try {
-      monthly_payment = totalDebtNumber * (monthly_interest_rate * (1 + monthly_interest_rate) ** payoff_time_months) / ((1 + monthly_interest_rate) ** payoff_time_months - 1);
-      total_interest_cost = (monthly_payment * payoff_time_months) - totalDebtNumber;
-      total_cost = totalDebtNumber + total_interest_cost;
+      monthly_payment = totalDebtNumber * (monthly_interest_rate * Math.pow(1 + monthly_interest_rate, payoff_time_months)) / (Math.pow(1 + monthly_interest_rate, payoff_time_months) - 1);
     } catch (calcError) {
       console.error('Calculation error in current situation:', calcError.message);
       throw new Error('Error in calculating current situation');
     }
 
+    // Choose the higher monthly payment
+    const finalMonthlyPayment = Math.max(monthly_payment, totalMonthlyPaymentNumber);
+
+    // Recalculate total interest cost and total cost based on the final monthly payment
+    let total_interest_cost, total_cost;
+    total_interest_cost = (finalMonthlyPayment * payoff_time_months) - totalDebtNumber;
+    total_cost = totalDebtNumber + total_interest_cost;
+
     // Check for NaN in calculated values
-    if (isNaN(monthly_payment) || isNaN(total_interest_cost) || isNaN(total_cost)) {
+    if (isNaN(finalMonthlyPayment) || isNaN(total_interest_cost) || isNaN(total_cost)) {
       throw new Error('Calculated value is NaN in current situation');
     }
 
@@ -181,7 +200,7 @@ exports.handler = async (event, context) => {
       creditUtilization: creditReport.revolvingCreditUtilization,
       totalDebt: totalDebtNumber.toFixed(2),
       currentSituation: {
-        monthlyPayment: monthly_payment.toFixed(2),
+        monthlyPayment: finalMonthlyPayment.toFixed(2),
         payoffTime: payoff_time_months,
         interestCost: total_interest_cost.toFixed(2),
         totalCost: total_cost.toFixed(2)
