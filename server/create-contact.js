@@ -116,19 +116,30 @@ exports.handler = async (event, context) => {
   // Parse the incoming request body to extract contact data
   const body = JSON.parse(event.body);
 
+  // Check for missing required information
+  const missingFields = [];
+  ['first_name', 'last_name', 'address', 'date_of_birth', 'phone_number', 'email'].forEach(field => {
+    if (!body[field]) {
+      missingFields.push(field);
+    }
+  });
+
   // Convert state name to capitalized abbreviation
-  const stateAbbreviation = getStateAbbreviation(body.address.state);
+  const stateAbbreviation = getStateAbbreviation(body.address?.state);
 
   // Check if the state is qualified and store the result as a string
   const qualificationStatus = qualifiedStates.includes(stateAbbreviation) ? "Qualified" : "Not Qualified";
 
-  // If the state is not qualified, return a structured response with all null values
-  if (qualificationStatus === "Not Qualified") {
+  // If the state is not qualified or there are missing fields, return a structured response
+  if (qualificationStatus === "Not Qualified" || missingFields.length > 0) {
     return {
       statusCode: 200,
       body: JSON.stringify({
         isStateQualified: qualificationStatus,
-        message: `State ${stateAbbreviation} is not qualified for processing.`,
+        missingInformation: missingFields.length > 0 ? missingFields : null,
+        message: qualificationStatus === "Not Qualified"
+          ? `State ${stateAbbreviation} is not qualified for processing.`
+          : "Missing required information.",
         response: {
           response: {
             id: null
@@ -187,6 +198,7 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       body: JSON.stringify({
         isStateQualified: qualificationStatus,
+        missingInformation: null,
         message: 'API call to Forth successful',
         response: response
       }),
