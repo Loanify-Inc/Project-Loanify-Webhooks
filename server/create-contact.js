@@ -124,6 +124,9 @@ exports.handler = async (event, context) => {
     }
   });
 
+  // Convert the list of missing fields to a single string
+  const missingFieldsString = missingFields.join(', ');
+
   // Convert state name to capitalized abbreviation
   const stateAbbreviation = getStateAbbreviation(body.address?.state);
 
@@ -136,7 +139,7 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       body: JSON.stringify({
         isStateQualified: qualificationStatus,
-        missingInformation: missingFields.length > 0 ? missingFields : null,
+        missingInformation: missingFields.length > 0 ? missingFieldsString : null,
         message: qualificationStatus === "Not Qualified"
           ? `State ${stateAbbreviation} is not qualified for processing.`
           : "Missing required information.",
