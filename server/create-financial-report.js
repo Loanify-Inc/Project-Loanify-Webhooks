@@ -321,24 +321,24 @@ exports.handler = async (event, context) => {
                     <div style="width: 100%; padding:20px 10px; border: 1px solid #1DA1F2; border-radius: 8px; display: flex; justify-content: center; align-items: center;">
                       <table style="width: 100%; max-width: 200px; font-size: 14px; color: #787878; line-height: 150%;" cellspacing="0">
                         <tr>
-                          <td>Excellent:</td>
-                          <td style="border-right: 5px solid #1DA1F2; text-align: right; padding-right: 8px;">701 -  800</td>
+                          <td>Exceptional:</td>
+                          <td style="border-right: 5px solid #1DA1F2; text-align: right; padding-right: 8px;">800 -  850</td>
+                        </tr>
+                        <tr>
+                          <td>Very Good:</td>
+                          <td style="border-right: 5px solid #67C5FF; text-align: right; padding-right: 8px;">740  -  799</td>
                         </tr>
                         <tr>
                           <td>Good:</td>
-                          <td style="border-right: 5px solid #67C5FF; text-align: right; padding-right: 8px;">501  -  700</td>
+                          <td style="border-right: 5px solid #9DDAFF; text-align: right; padding-right: 8px;">670  -  739</td>
                         </tr>
                         <tr>
                           <td>Fair:</td>
-                          <td style="border-right: 5px solid #9DDAFF; text-align: right; padding-right: 8px;">351  -  500</td>
-                        </tr>
-                        <tr>
-                          <td>Uncertain:</td>
-                          <td style="border-right: 5px solid #C2E8FF; text-align: right; padding-right: 8px;">301 -  350</td>
+                          <td style="border-right: 5px solid #C2E8FF; text-align: right; padding-right: 8px;">580 -  669</td>
                         </tr>
                         <tr>
                           <td>Poor:</td>
-                          <td style="border-right: 5px solid #E1F4FF; text-align: right; padding-right: 8px;">250 -  300</td>
+                          <td style="border-right: 5px solid #E1F4FF; text-align: right; padding-right: 8px;">300 -  579</td>
                         </tr>
                       </table>
                     </div>
