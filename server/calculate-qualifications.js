@@ -79,10 +79,10 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       body: JSON.stringify({
         totalDebt: totalDebt,
-        status: status,
-        debts: debtDetails,
         creditUtilization: creditUtilization,
-        creditScore: creditScore
+        creditScore: creditScore,
+        status: status,
+        debts: debtDetails
       }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
