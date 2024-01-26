@@ -14,22 +14,32 @@ exports.handler = async (event, context) => {
     };
   }
 
-  const API_PATH = `/v1/contacts/${contactId}/debts/enrolled`;
-  const options = {
-    hostname: BASE_URL,
-    path: API_PATH,
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'API-Key': API_KEY,
-    },
-  };
-
   try {
-    const response = await performHttpRequest(options);
+    // Fetch credit report and debts in parallel
+    const [creditReportResponse, debtResponse] = await Promise.all([
+      performHttpRequest({
+        hostname: BASE_URL,
+        path: `/v1/contacts/${contactId}/get_credit_report`,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'API-Key': API_KEY,
+        },
+      }),
+      performHttpRequest({
+        hostname: BASE_URL,
+        path: `/v1/contacts/${contactId}/debts/enrolled`,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'API-Key': API_KEY,
+        },
+      }),
+    ]);
 
-    // Parse the response and extract the required information
-    const debts = JSON.parse(response).response;
+    // Parse the responses
+    const creditReport = JSON.parse(creditReportResponse).response.report;
+    const debts = JSON.parse(debtResponse).response;
     const allowedDebtTypes = [
       'CreditCard',
       'Unsecured',
@@ -60,16 +70,20 @@ exports.handler = async (event, context) => {
       }));
 
     const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
-
-    // Determine the status based on the totalDebt amount
     const status = totalDebt >= 10000 ? 'Qualified' : 'Not Qualified';
 
-    console.log('Calculated total debt:', totalDebt);
-    console.log('Debt details:', debtDetails);
+    const creditUtilization = creditReport.revolvingCreditUtilization;
+    const creditScore = creditReport.scoreModels.Equifax.score;
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ totalDebt: totalDebt, status: status, debts: debtDetails }),
+      body: JSON.stringify({
+        totalDebt: totalDebt,
+        status: status,
+        debts: debtDetails,
+        creditUtilization: creditUtilization,
+        creditScore: creditScore
+      }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   } catch (error) {
