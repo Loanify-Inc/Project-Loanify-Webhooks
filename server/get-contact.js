@@ -4,25 +4,26 @@ exports.handler = async (event, context) => {
   const API_KEY = process.env.API_KEY;
   const BASE_URL = 'api.forthcrm.com';
   const requestBody = JSON.parse(event.body);
-  const phone = requestBody.phone;
+  const ssn = requestBody.ssn;
 
-  console.log("Phone: " + requestBody.phone);
-
-
-  if (!phone) {
-    console.error('Phone number is required');
+  if (!ssn) {
+    console.error('SSN is required');
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: 'Phone number is required' }),
+      body: JSON.stringify({ error: 'SSN is required' }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
   }
 
-  const encodedPhone = encodeURIComponent(phone);
+  const searchBody = JSON.stringify({
+    field: "ssn",
+    term: ssn
+  });
+
   const options = {
     hostname: BASE_URL,
-    path: `/v1/contacts/search_by_phone/${encodedPhone}`,
-    method: 'GET',
+    path: '/v1/contacts/search',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'API-Key': API_KEY,
@@ -30,11 +31,14 @@ exports.handler = async (event, context) => {
   };
 
   try {
-    const response = await performHttpRequest(options);
+    const response = await performHttpRequest(options, searchBody);
+
+    // Parse the response
     const searchResults = JSON.parse(response);
 
-    if (searchResults.response && searchResults.response.length > 0) {
-      const contactId = searchResults.response[0].id;
+    // Check if there are any results
+    if (searchResults.response.total > 0) {
+      const contactId = searchResults.response.results[0].id;
 
       return {
         statusCode: 200,
@@ -58,7 +62,7 @@ exports.handler = async (event, context) => {
   }
 };
 
-function performHttpRequest(options) {
+function performHttpRequest(options, postData) {
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
       let data = '';
@@ -79,6 +83,10 @@ function performHttpRequest(options) {
     req.on('error', (error) => {
       reject({ statusCode: 500, message: error.message });
     });
+
+    if (postData) {
+      req.write(postData);
+    }
 
     req.end();
   });
