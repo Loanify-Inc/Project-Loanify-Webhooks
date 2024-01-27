@@ -72,8 +72,9 @@ exports.handler = async (event, context) => {
     const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
     const status = totalDebt >= 10000 ? 'Qualified' : 'Not Qualified';
 
-    const creditUtilizationPercentage = parseFloat(creditReport.revolvingCreditUtilization.replace('%', ''));
-    const creditUtilization = getCreditUtilizationCategory(creditUtilizationPercentage);
+    const creditUtilizationRaw = creditReport.revolvingCreditUtilization.replace('%', '');
+    const creditUtilizationPercentage = parseFloat(creditUtilizationRaw);
+    const creditUtilization = isNaN(creditUtilizationPercentage) ? 'NaN' : getCreditUtilizationCategory(creditUtilizationPercentage);
     const creditScore = creditReport.scoreModels.Equifax.score;
 
     function getCreditUtilizationCategory(percentage) {
