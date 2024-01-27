@@ -72,8 +72,23 @@ exports.handler = async (event, context) => {
     const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
     const status = totalDebt >= 10000 ? 'Qualified' : 'Not Qualified';
 
-    const creditUtilization = creditReport.revolvingCreditUtilization;
+    const creditUtilizationPercentage = parseFloat(creditReport.revolvingCreditUtilization.replace('%', ''));
+    const creditUtilization = getCreditUtilizationCategory(creditUtilizationPercentage);
     const creditScore = creditReport.scoreModels.Equifax.score;
+
+    function getCreditUtilizationCategory(percentage) {
+      if (percentage > 100) {
+        return 'Overutilization';
+      } else if (percentage >= 91) {
+        return 'Very High';
+      } else if (percentage >= 61) {
+        return 'High';
+      } else if (percentage >= 31) {
+        return 'Moderate';
+      } else {
+        return 'Low';
+      }
+    }
 
     return {
       statusCode: 200,
