@@ -18,9 +18,6 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // Remove dashes from the phone number
-  phone = phone.replace(/-/g, '');
-
   const options = {
     hostname: BASE_URL,
     path: `/v1/contacts/search_by_phone/${phone}`,
