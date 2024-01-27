@@ -6,6 +6,9 @@ exports.handler = async (event, context) => {
   const requestBody = JSON.parse(event.body);
   const phone = requestBody.phone;
 
+  console.log("Phone: " + requestBody.phone);
+
+
   if (!phone) {
     console.error('Phone number is required');
     return {
