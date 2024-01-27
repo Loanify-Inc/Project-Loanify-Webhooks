@@ -18,9 +18,10 @@ exports.handler = async (event, context) => {
     };
   }
 
+  const encodedPhone = encodeURIComponent(phone);
   const options = {
     hostname: BASE_URL,
-    path: `/v1/contacts/search_by_phone/${phone}`,
+    path: `/v1/contacts/search_by_phone/${encodedPhone}`,
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
