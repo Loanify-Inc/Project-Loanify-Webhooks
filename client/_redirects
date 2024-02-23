@@ -2,4 +2,5 @@
 /create-contact /.netlify/functions/create-contact 200
 /create-financial-report /.netlify/functions/create-financial-report 200
 /get-contact /.netlify/functions/get-contact 200
+/manually-create-financial-report /.netlify/functions/manually-create-financial-report 200
 /run-credit /.netlify/functions/run-credit 200
