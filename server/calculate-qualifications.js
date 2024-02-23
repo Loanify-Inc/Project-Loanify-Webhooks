@@ -72,6 +72,9 @@ exports.handler = async (event, context) => {
     const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
     const status = totalDebt >= 10000 ? 'Qualified' : 'Not Qualified';
 
+    // Check if total debt meets the threshold of $35,000
+    const debtThresholdMet = parseFloat(totalDebt) >= 35000 ? 'Yes' : 'No';
+
     const creditUtilizationRaw = creditReport.revolvingCreditUtilization;
     const creditUtilizationPercentage = creditUtilizationRaw ? parseFloat(creditUtilizationRaw.replace('%', '')) : 'NaN';
     const creditUtilization = isNaN(creditUtilizationPercentage) ? 'NaN' : getCreditUtilizationCategory(creditUtilizationPercentage);
@@ -95,6 +98,7 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       body: JSON.stringify({
         totalDebt: totalDebt,
+        debtThresholdMet: debtThresholdMet,
         creditUtilization: creditUtilization,
         creditScore: creditScore,
         status: status,
