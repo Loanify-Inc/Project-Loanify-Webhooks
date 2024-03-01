@@ -5,7 +5,7 @@ exports.handler = async (event, context) => {
     const API_KEY = process.env.API_KEY;
     const BASE_URL = 'api.forthcrm.com';
     const requestBody = JSON.parse(event.body);
-    const contactId = requestBody.id; // Assuming the contact ID is provided in the request body
+    const contactId = requestBody.contact_id;
 
     if (!contactId) {
       console.error('Contact ID is required');
