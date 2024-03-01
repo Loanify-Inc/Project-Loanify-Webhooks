@@ -13,14 +13,31 @@ AWS.config.update({
 
 const s3 = new AWS.S3();
 
+// Function to determine the modified payoff time
+function determinePayoffTime(totalDebt, numOfAccounts) {
+  if (numOfAccounts === 1) return 24; // Max term of 24 months for a single account
+
+  if (totalDebt >= 60000) return 60;
+  if (totalDebt >= 35000) return 54;
+  if (totalDebt >= 20000) return 48;
+  if (totalDebt >= 15000) return 42;
+  if (totalDebt >= 10000) return 36;
+
+  return 36; // Default to 36 if below 10000 (or as per your business logic)
+}
+
 exports.handler = async (event, context) => {
   try {
     const API_KEY = process.env.API_KEY;
     const BASE_URL = 'api.forthcrm.com';
+
+    // UPDATED: Extracting contactId and includedAccounts from the event body
     const requestBody = JSON.parse(event.body);
+
+    console.log("Body: " + event.body)
+
     const contactId = requestBody.contact_id;
-    const totalDebt = requestBody.totalDebt; // Provided totalDebt
-    const debtModificationProgram = requestBody.debt_modification_program; // Provided debt modification program details
+    const includedAccounts = requestBody.included_accounts; // New parameter
 
     if (!contactId) {
       console.error('Contact ID is required');
@@ -92,6 +109,31 @@ exports.handler = async (event, context) => {
     // Process responses
     const creditReport = JSON.parse(creditReportResponse).response.report;
     const contactInfo = JSON.parse(contactResponse).response;
+    const debts = JSON.parse(debtResponse).response;
+
+    // Process debts
+    const allowedDebtTypes = [
+      'CreditCard', 'Unsecured', 'CheckCreditOrLineOfCredit', 'Collection',
+      'MedicalDebt', 'ChargeAccount', 'Recreational', 'NoteLoan', 'InstallmentLoan'
+    ];
+
+    // UPDATED: Filtering debts by includedAccounts, if provided
+    const debtDetails = debts
+      .filter(debt =>
+        parseFloat(debt.current_debt_amount) >= 500 &&
+        allowedDebtTypes.some(type => debt.notes.includes(type)) &&
+        (!includedAccounts || includedAccounts.length === 0 || includedAccounts.includes(debt.og_account_num))
+      )
+      .map(debt => ({
+        accountNumber: debt.og_account_num,
+        companyName: debt.creditor.company_name,
+        individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
+        debtType: allowedDebtTypes.find(type => debt.notes.includes(type))
+      }));
+
+    const totalDebt = debtDetails
+      .reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0)
+      .toFixed(2);
 
     // Ensure totalDebt is a number
     const totalDebtNumber = Number(totalDebt);
@@ -99,35 +141,86 @@ exports.handler = async (event, context) => {
       throw new Error('Total debt is not a valid number');
     }
 
-    // Current Situation Calculation based on provided totalDebt
-    const annual_interest_rate = 0.24; // Assuming 24% annual interest rate
+    // Calculate Total Monthly Payment
+    const totalMonthlyPayment = debts
+      .filter(debt => parseFloat(debt.current_debt_amount) >= 500 &&
+        allowedDebtTypes.some(type => debt.notes.includes(type)))
+      .reduce((acc, debt) => acc + parseFloat(debt.current_payment), 0)
+      .toFixed(2);
+
+    // Ensure totalMonthlyPayment is a number
+    const totalMonthlyPaymentNumber = Number(totalMonthlyPayment);
+    if (isNaN(totalMonthlyPaymentNumber)) {
+      throw new Error('Total monthly payment is not a valid number');
+    }
+
+    // Current Situation Calculation
+    const annual_interest_rate = 0.24; // 24%
     const monthly_interest_rate = annual_interest_rate / 12;
-    const payoff_time_months = 120; // Assuming 10 years for payoff
+    const payoff_time_months = 120; // 10 years
 
-    let monthly_payment = totalDebtNumber * (monthly_interest_rate * Math.pow(1 + monthly_interest_rate, payoff_time_months)) / (Math.pow(1 + monthly_interest_rate, payoff_time_months) - 1);
+    let monthly_payment;
+    try {
+      monthly_payment = totalDebtNumber * (monthly_interest_rate * Math.pow(1 + monthly_interest_rate, payoff_time_months)) / (Math.pow(1 + monthly_interest_rate, payoff_time_months) - 1);
+    } catch (calcError) {
+      console.error('Calculation error in current situation:', calcError.message);
+      throw new Error('Error in calculating current situation');
+    }
 
-    let total_interest_cost = (monthly_payment * payoff_time_months) - totalDebtNumber;
-    let total_cost = totalDebtNumber + total_interest_cost;
+    // Choose the higher monthly payment
+    const finalMonthlyPayment = Math.max(monthly_payment, totalMonthlyPaymentNumber);
 
-    // Define the payload object using provided totalDebt and calculated current situation
+    // Recalculate total interest cost and total cost based on the final monthly payment
+    let total_interest_cost, total_cost;
+    total_interest_cost = (finalMonthlyPayment * payoff_time_months) - totalDebtNumber;
+    total_cost = totalDebtNumber + total_interest_cost;
+
+    // Check for NaN in calculated values
+    if (isNaN(finalMonthlyPayment) || isNaN(total_interest_cost) || isNaN(total_cost)) {
+      throw new Error('Calculated value is NaN in current situation');
+    }
+
+    // Debt Modification Program Calculation with 25% reduction
+    const modified_total_debt = totalDebtNumber * 0.75; // 25% reduction
+
+    // Determine the number of accounts
+    const numOfAccounts = debtDetails.length;
+
+    // Use the determinePayoffTime function to get the modified payoff time
+    const modified_payoff_time_months = determinePayoffTime(totalDebtNumber, numOfAccounts);
+
+    // Calculate the exact modified monthly payment
+    const exact_modified_monthly_payment = modified_total_debt / modified_payoff_time_months;
+
+    // Ensure exact_modified_monthly_payment and modified_total_debt are numbers
+    if (isNaN(exact_modified_monthly_payment) || isNaN(modified_total_debt)) {
+      throw new Error('Error in calculating debt modification program');
+    }
+
+    // Define the payload object
     const payload = {
       firstName: contactInfo.first_name,
       lastName: contactInfo.last_name,
-      preparedBy: "Your Name", // Update with your actual name
+      preparedBy: "Kevin Kullins",
       creditScore: creditReport.scoreModels.Equifax.score,
-      // Additional credit report details as needed
+      redFlagCodes: creditReport.scoreModels.Equifax.factors.map(factor => {
+        const [code, description] = factor.split(" - ", 2);
+        return { code: code.trim(), description: description.trim() };
+      }),
+      debts: debtDetails,
+      creditUtilization: creditReport.revolvingCreditUtilization,
       totalDebt: totalDebtNumber.toFixed(2),
       currentSituation: {
-        monthlyPayment: monthly_payment.toFixed(2),
+        monthlyPayment: finalMonthlyPayment.toFixed(2),
         payoffTime: payoff_time_months,
         interestCost: total_interest_cost.toFixed(2),
         totalCost: total_cost.toFixed(2)
       },
       debtModificationProgram: {
-        monthlyPayment: debtModificationProgram.monthlyPayment,
-        payoffTime: debtModificationProgram.payoffTime,
-        interestCost: debtModificationProgram.interestCost,
-        totalCost: debtModificationProgram.totalCost
+        monthlyPayment: exact_modified_monthly_payment.toFixed(2),
+        payoffTime: modified_payoff_time_months,
+        interestCost: "0.00",
+        totalCost: modified_total_debt.toFixed(2)
       }
     };
 
@@ -755,6 +848,8 @@ exports.handler = async (event, context) => {
     };
 
     const uploadResult = await s3.upload(s3Params).promise();
+
+    console.log("Report URL: " + uploadResult.Location)
 
     // Prepare the response object
     const response = {
