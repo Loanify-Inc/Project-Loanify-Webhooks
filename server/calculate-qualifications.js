@@ -50,7 +50,6 @@ exports.handler = async (event, context) => {
       'Recreational',
       'NoteLoan',
       'InstallmentLoan',
-      'Other',
     ];
 
     const debtDetails = debts
