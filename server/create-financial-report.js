@@ -107,7 +107,7 @@ exports.handler = async (event, context) => {
     // Process debts
     const allowedDebtTypes = [
       'CreditCard', 'Unsecured', 'CheckCreditOrLineOfCredit', 'Collection',
-      'MedicalDebt', 'ChargeAccount', 'Recreational', 'NoteLoan', 'InstallmentLoan'
+      'MedicalDebt', 'ChargeAccount', 'Recreational', 'NoteLoan', 'InstallmentLoan', 'Other',
     ];
 
     const debtDetails = debts
