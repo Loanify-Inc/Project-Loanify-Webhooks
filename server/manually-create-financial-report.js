@@ -831,7 +831,6 @@ exports.handler = async (event, context) => {
 
     const uploadResult = await s3.upload(s3Params).promise();
 
-
     // Prepare the note content with the report URL
     const noteContent = JSON.stringify({
       content: `Financial report available at: ${uploadResult.Location}`,
