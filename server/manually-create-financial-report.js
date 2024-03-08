@@ -31,6 +31,8 @@ exports.handler = async (event, context) => {
     const API_KEY = process.env.API_KEY;
     const BASE_URL = 'api.forthcrm.com';
 
+    console.log("Event: " + event)
+
     // UPDATED: Extracting contactId and includedAccounts from the event body
     const requestBody = JSON.parse(event.body);
 
