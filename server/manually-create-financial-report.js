@@ -833,6 +833,26 @@ exports.handler = async (event, context) => {
 
     console.log("Report URL: " + uploadResult.Location)
 
+    // Prepare the note content with the report URL
+    const noteContent = JSON.stringify({
+      content: `Financial report available at: ${uploadResult.Location}`,
+      note_type: 1,
+      public: true
+    });
+
+    const noteResponse = await performHttpRequest({
+      hostname: 'api.forthcrm.com',
+      path: `/v1/contacts/${contactId}/notes`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'API-Key': process.env.API_KEY,
+      },
+      body: noteContent
+    });
+
+    console.log("Forth CRM Response:", noteResponse);
+
     // Prepare the response object
     const response = {
       statusCode: 200,
