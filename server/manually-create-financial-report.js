@@ -831,7 +831,7 @@ exports.handler = async (event, context) => {
 
     const uploadResult = await s3.upload(s3Params).promise();
 
-    // Prepare the note content with the report URL
+    /*// Prepare the note content with the report URL
     const noteContent = JSON.stringify({
       content: `Financial report available at: ${uploadResult.Location}`,
       note_type: 1,
@@ -851,7 +851,7 @@ exports.handler = async (event, context) => {
       body: noteContent
     });
 
-    console.log("Forth CRM Response:", noteResponse);
+    console.log("Forth CRM Response:", noteResponse);*/
 
     // Prepare the response object
     const response = {
