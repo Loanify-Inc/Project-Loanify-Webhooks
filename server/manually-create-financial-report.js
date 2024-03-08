@@ -31,15 +31,10 @@ exports.handler = async (event, context) => {
     const API_KEY = process.env.API_KEY;
     const BASE_URL = 'api.forthcrm.com';
 
-    console.log("Event: " + event)
-
-    // UPDATED: Extracting contactId and includedAccounts from the event body
+    // Extracting contactId from the event body
     const requestBody = JSON.parse(event.body);
-
     console.log("Body: " + event.body)
-
     const contactId = requestBody.contact_id;
-    const includedAccounts = requestBody.included_accounts; // New parameter
 
     if (!contactId) {
       console.error('Contact ID is required');
@@ -113,25 +108,12 @@ exports.handler = async (event, context) => {
     const contactInfo = JSON.parse(contactResponse).response;
     const debts = JSON.parse(debtResponse).response;
 
-    // Process debts
-    const allowedDebtTypes = [
-      'CreditCard', 'Unsecured', 'CheckCreditOrLineOfCredit', 'Collection',
-      'MedicalDebt', 'ChargeAccount', 'Recreational', 'NoteLoan', 'InstallmentLoan'
-    ];
-
-    // UPDATED: Filtering debts by includedAccounts, if provided
-    const debtDetails = debts
-      .filter(debt =>
-        parseFloat(debt.current_debt_amount) >= 500 &&
-        allowedDebtTypes.some(type => debt.notes.includes(type)) &&
-        (!includedAccounts || includedAccounts.length === 0 || includedAccounts.includes(debt.og_account_num))
-      )
-      .map(debt => ({
-        accountNumber: debt.og_account_num,
-        companyName: debt.creditor.company_name,
-        individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
-        debtType: allowedDebtTypes.find(type => debt.notes.includes(type))
-      }));
+    // Process all debts without filtering by debt type or amount
+    const debtDetails = debts.map(debt => ({
+      accountNumber: debt.og_account_num,
+      companyName: debt.creditor.company_name,
+      individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
+    }));
 
     const totalDebt = debtDetails
       .reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0)
@@ -143,10 +125,8 @@ exports.handler = async (event, context) => {
       throw new Error('Total debt is not a valid number');
     }
 
-    // Calculate Total Monthly Payment
+    // Calculate Total Monthly Payment based on the current debts
     const totalMonthlyPayment = debts
-      .filter(debt => parseFloat(debt.current_debt_amount) >= 500 &&
-        allowedDebtTypes.some(type => debt.notes.includes(type)))
       .reduce((acc, debt) => acc + parseFloat(debt.current_payment), 0)
       .toFixed(2);
 
