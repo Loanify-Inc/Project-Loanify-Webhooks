@@ -831,7 +831,6 @@ exports.handler = async (event, context) => {
 
     const uploadResult = await s3.upload(s3Params).promise();
 
-    console.log("Report URL: " + uploadResult.Location)
 
     // Prepare the note content with the report URL
     const noteContent = JSON.stringify({
@@ -839,6 +838,8 @@ exports.handler = async (event, context) => {
       note_type: 1,
       public: true
     });
+
+    console.log("Note Content: " + noteContent)
 
     const noteResponse = await performHttpRequest({
       hostname: 'api.forthcrm.com',
