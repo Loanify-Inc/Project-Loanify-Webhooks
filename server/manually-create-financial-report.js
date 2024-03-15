@@ -831,27 +831,56 @@ exports.handler = async (event, context) => {
 
     const uploadResult = await s3.upload(s3Params).promise();
 
-    /*// Prepare the note content with the report URL
-    const noteContent = JSON.stringify({
-      content: `Financial report available at: ${uploadResult.Location}`,
-      note_type: 1,
-      public: true
-    });
+    // Define the function to perform HTTP POST requests
+    function performHttpPostRequest(options, body) {
+      return new Promise((resolve, reject) => {
+        const req = https.request(options, (res) => {
+          let data = '';
 
-    console.log("Note Content: " + noteContent)
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
 
-    const noteResponse = await performHttpRequest({
-      hostname: 'api.forthcrm.com',
-      path: `/v1/contacts/${contactId}/notes`,
+          res.on('end', () => {
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+              resolve(data);
+            } else {
+              reject({ statusCode: res.statusCode, message: data });
+            }
+          });
+        });
+
+        req.on('error', (error) => {
+          reject({ statusCode: 500, message: error.message });
+        });
+
+        // Write the JSON body and end the request
+        req.write(JSON.stringify(body));
+        req.end();
+      });
+    }
+
+    // Usage of the performHttpPostRequest function to send the Slack message
+    const slackWebhookOptions = {
+      hostname: 'hooks.slack.com',
+      path: '/services/T0607C1F0GP/B06PQ8AELMR/26hCLEbwAM2Kn9ZK4ajx9clI',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'API-Key': process.env.API_KEY,
-      },
-      body: noteContent
-    });
+      }
+    };
 
-    console.log("Forth CRM Response:", noteResponse);*/
+    const slackMessage = {
+      text: `<@U065V4AE5KJ> Here is the updated report you requested for ${payload.firstName} ${payload.lastName}: ${uploadResult.Location}`
+    };
+
+    try {
+      // Await the POST request to send the message to Slack
+      await performHttpPostRequest(slackWebhookOptions, slackMessage);
+      console.log('Slack message sent successfully.');
+    } catch (error) {
+      console.error('Error sending Slack message:', error);
+    }
 
     // Prepare the response object
     const response = {
