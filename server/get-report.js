@@ -74,21 +74,20 @@ exports.handler = async (event) => {
       .map(debt => ({
         accountNumber: debt.og_account_num,
         companyName: debt.creditor.company_name,
-        individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
+        individualDebtAmount: parseFloat(debt.current_debt_amount),
         debtType: allowedDebtTypes.find(type => debt.notes.includes(type))
       }));
 
     const totalDebt = debtDetails
-      .reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0)
-      .toFixed(2);
+      .reduce((acc, debt) => acc + debt.individualDebtAmount, 0);
 
-    // Prepare and return the response
+    // Prepare and return the response, switching the order of totalDebt and debtDetails
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
+        totalDebt: totalDebt,
         debts: debtDetails,
-        totalDebt: Number(totalDebt),
       }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
@@ -101,4 +100,5 @@ exports.handler = async (event) => {
     };
   }
 };
+
 
