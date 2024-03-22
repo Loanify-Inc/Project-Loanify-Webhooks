@@ -42,13 +42,15 @@ exports.handler = async (event) => {
     const contactId = JSON.parse(event.body).contact_id;
 
     if (!contactId) {
+      console.error('Contact ID is required');
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'Contact ID is required' }),
+        headers: { 'Access-Control-Allow-Origin': '*' },
       };
     }
 
-    // Fetch debts in parallel
+    // Fetch debts
     const debtResponse = await performHttpRequest({
       hostname: BASE_URL,
       path: `/v1/contacts/${contactId}/debts/enrolled`,
@@ -76,10 +78,19 @@ exports.handler = async (event) => {
         debtType: allowedDebtTypes.find(type => debt.notes.includes(type))
       }));
 
-    // Return the response with debtDetails
+    const totalDebt = debtDetails
+      .reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0)
+      .toFixed(2);
+
+    // Prepare and return the response
     return {
       statusCode: 200,
-      body: JSON.stringify({ debtDetails }),
+      body: JSON.stringify({
+        success: true,
+        debts: debtDetails,
+        totalDebt: Number(totalDebt),
+      }),
+      headers: { 'Access-Control-Allow-Origin': '*' },
     };
 
   } catch (error) {
@@ -90,3 +101,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
