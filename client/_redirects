@@ -5,4 +5,5 @@
 /get-referrer /.netlify/functions/get-referrer 200
 /get-report /.netlify/functions/get-report 200
 /manually-create-financial-report /.netlify/functions/manually-create-financial-report 200
+/reassign-contact /.netlify/functions/reassign-contact 200
 /run-credit /.netlify/functions/run-credit 200
