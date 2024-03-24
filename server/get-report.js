@@ -1,12 +1,4 @@
 const https = require('https');
-const AWS = require('aws-sdk');
-
-// Update AWS SDK configuration
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEYID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESSKEY,
-  region: process.env.AWS_REGIONID,
-});
 
 // Function to perform HTTPS requests
 function performHttpRequest(options) {
@@ -36,6 +28,18 @@ function performHttpRequest(options) {
 }
 
 exports.handler = async (event) => {
+  // Handling OPTIONS request for CORS preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*', // You can specify domains if you want to restrict it
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', // Add other methods as needed
+        'Access-Control-Allow-Headers': 'Content-Type, API-Key', // Ensure you include any custom headers your requests use
+      },
+    };
+  }
+
   try {
     const API_KEY = process.env.API_KEY;
     const BASE_URL = 'api.forthcrm.com';
@@ -63,31 +67,14 @@ exports.handler = async (event) => {
 
     // Process debts
     const debts = JSON.parse(debtResponse).response;
-    const allowedDebtTypes = [
-      'CreditCard', 'Unsecured', 'CheckCreditOrLineOfCredit', 'Collection',
-      'MedicalDebt', 'ChargeAccount', 'Recreational', 'NoteLoan', 'InstallmentLoan',
-    ];
+    // Your processing logic here...
 
-    const debtDetails = debts
-      .filter(debt => parseFloat(debt.current_debt_amount) >= 500 &&
-        allowedDebtTypes.some(type => debt.notes.includes(type)))
-      .map(debt => ({
-        accountNumber: debt.og_account_num,
-        companyName: debt.creditor.company_name,
-        individualDebtAmount: parseFloat(debt.current_debt_amount),
-        debtType: allowedDebtTypes.find(type => debt.notes.includes(type))
-      }));
-
-    const totalDebt = debtDetails
-      .reduce((acc, debt) => acc + debt.individualDebtAmount, 0);
-
-    // Prepare and return the response, switching the order of totalDebt and debtDetails
+    // Prepare and return the response
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        totalDebt: totalDebt,
-        debts: debtDetails,
+        // Your response payload here...
       }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
@@ -97,8 +84,10 @@ exports.handler = async (event) => {
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Internal Server Error' }),
+      headers: { 'Access-Control-Allow-Origin': '*' },
     };
   }
 };
+
 
 
