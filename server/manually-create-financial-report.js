@@ -26,6 +26,17 @@ function determinePayoffTime(totalDebt, numOfAccounts) {
   return 36; // Default to 36 if below 10000 (or as per your business logic)
 }
 
+const slackConfigMap = {
+  '8735070': { // Kevin
+    userId: '<@U065V4AE5KJ>',
+    webhookPath: '/services/T0607C1F0GP/B06PQ8AELMR/26hCLEbwAM2Kn9ZK4ajx9clI',
+  },
+  '8886206': { // Alex
+    userId: '<@U06PCRVCAJC>',
+    webhookPath: '/services/T0607C1F0GP/B06QZ2X58BX/FjcDfHlWOYDpZqQPTiuPuslU',
+  }
+};
+
 exports.handler = async (event, context) => {
   try {
     const API_KEY = process.env.API_KEY;
@@ -860,10 +871,22 @@ exports.handler = async (event, context) => {
       });
     }
 
-    // Usage of the performHttpPostRequest function to send the Slack message
+    const slackConfigMap = {
+      '8735070': { // Kevin
+        userId: '<@U065V4AE5KJ>',
+        webhookPath: '/services/T0607C1F0GP/B06PQ8AELMR/26hCLEbwAM2Kn9ZK4ajx9clI',
+      },
+      '8886206': { // Alex
+        userId: '<@U06PCRVCAJC>',
+        webhookPath: '/services/T0607C1F0GP/B06QZ2X58BX/FjcDfHlWOYDpZqQPTiuPuslU',
+      }
+    };
+
+    const slackConfig = slackConfigMap[contactInfo.assigned_to]
+
     const slackWebhookOptions = {
       hostname: 'hooks.slack.com',
-      path: '/services/T0607C1F0GP/B06PQ8AELMR/26hCLEbwAM2Kn9ZK4ajx9clI',
+      path: slackConfig.webhookPath,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -871,7 +894,7 @@ exports.handler = async (event, context) => {
     };
 
     const slackMessage = {
-      text: `<@U065V4AE5KJ> Here is the updated report you requested for ${payload.firstName} ${payload.lastName}: ${uploadResult.Location}`
+      text: `${slackConfig.userId} Here is the updated report you requested for ${payload.firstName} ${payload.lastName}: ${uploadResult.Location}`
     };
 
     try {
