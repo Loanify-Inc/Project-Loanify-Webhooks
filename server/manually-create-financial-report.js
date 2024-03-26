@@ -26,17 +26,6 @@ function determinePayoffTime(totalDebt, numOfAccounts) {
   return 36; // Default to 36 if below 10000 (or as per your business logic)
 }
 
-const slackConfigMap = {
-  '8735070': { // Kevin
-    userId: '<@U065V4AE5KJ>',
-    webhookPath: '/services/T0607C1F0GP/B06PQ8AELMR/26hCLEbwAM2Kn9ZK4ajx9clI',
-  },
-  '8886206': { // Alex
-    userId: '<@U06PCRVCAJC>',
-    webhookPath: '/services/T0607C1F0GP/B06QZ2X58BX/FjcDfHlWOYDpZqQPTiuPuslU',
-  }
-};
-
 exports.handler = async (event, context) => {
   try {
     const API_KEY = process.env.API_KEY;
@@ -148,28 +137,15 @@ exports.handler = async (event, context) => {
     }
 
     // Current Situation Calculation
-    const annual_interest_rate = 0.24; // 24%
-    const monthly_interest_rate = annual_interest_rate / 12;
     const payoff_time_months = 120; // 10 years
-
-    let monthly_payment;
-    try {
-      monthly_payment = totalDebtNumber * (monthly_interest_rate * Math.pow(1 + monthly_interest_rate, payoff_time_months)) / (Math.pow(1 + monthly_interest_rate, payoff_time_months) - 1);
-    } catch (calcError) {
-      console.error('Calculation error in current situation:', calcError.message);
-      throw new Error('Error in calculating current situation');
-    }
-
-    // Choose the higher monthly payment
-    const finalMonthlyPayment = Math.max(monthly_payment, totalMonthlyPaymentNumber);
 
     // Recalculate total interest cost and total cost based on the final monthly payment
     let total_interest_cost, total_cost;
-    total_interest_cost = (finalMonthlyPayment * payoff_time_months) - totalDebtNumber;
+    total_interest_cost = totalMonthlyPaymentNumber * payoff_time_months;
     total_cost = totalDebtNumber + total_interest_cost;
 
     // Check for NaN in calculated values
-    if (isNaN(finalMonthlyPayment) || isNaN(total_interest_cost) || isNaN(total_cost)) {
+    if (isNaN(totalMonthlyPaymentNumber) || isNaN(total_interest_cost) || isNaN(total_cost)) {
       throw new Error('Calculated value is NaN in current situation');
     }
 
@@ -204,7 +180,7 @@ exports.handler = async (event, context) => {
       creditUtilization: creditReport.revolvingCreditUtilization,
       totalDebt: totalDebtNumber.toFixed(2),
       currentSituation: {
-        monthlyPayment: finalMonthlyPayment.toFixed(2),
+        monthlyPayment: totalMonthlyPaymentNumber.toFixed(2),
         payoffTime: payoff_time_months,
         interestCost: total_interest_cost.toFixed(2),
         totalCost: total_cost.toFixed(2)
