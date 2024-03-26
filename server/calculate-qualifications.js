@@ -52,6 +52,8 @@ exports.handler = async (event, context) => {
       'InstallmentLoan',
     ];
 
+    let totalUnsecuredDebt = 0;
+
     const debtDetails = debts
       .filter(debt => {
         // Check if the debt amount is greater than or equal to $500
@@ -59,6 +61,11 @@ exports.handler = async (event, context) => {
 
         // Extract the allowed debt type from the notes
         const debtType = allowedDebtTypes.find(type => debt.notes.includes(type));
+
+        // If debtType is "Unsecured", add its amount to totalUnsecuredDebt
+        if (debtType === "Unsecured" && isDebtAmountValid) {
+          totalUnsecuredDebt += parseFloat(debt.current_debt_amount);
+        }
 
         return isDebtAmountValid && !!debtType;
       })
@@ -68,6 +75,9 @@ exports.handler = async (event, context) => {
         individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
         debtType: allowedDebtTypes.find(type => debt.notes.includes(type)),
       }));
+
+    totalUnsecuredDebt = totalUnsecuredDebt.toFixed(2);
+    const unsecuredDebtThresholdMet = parseFloat(totalUnsecuredDebt) > 10000 ? 'Yes' : 'No';
 
     const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
     const status = totalDebt >= 10000 ? 'Qualified' : 'Not Qualified';
@@ -98,7 +108,9 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       body: JSON.stringify({
         totalDebt: totalDebt,
+        totalUnsecuredDebt: totalUnsecuredDebt,
         debtThresholdMet: debtThresholdMet,
+        unsecuredDebtThresholdMet: unsecuredDebtThresholdMet,
         creditUtilization: creditUtilization,
         creditScore: creditScore,
         status: status,
