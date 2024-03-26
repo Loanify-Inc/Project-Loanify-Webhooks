@@ -116,12 +116,13 @@ exports.handler = async (event, context) => {
       .map(debt => ({
         accountNumber: debt.og_account_num,
         companyName: debt.creditor.company_name,
-        individualDebtAmount: parseFloat(debt.current_debt_amount),
+        individualDebtAmount: parseFloat(debt.current_debt_amount).toFixed(2),
         debtType: allowedDebtTypes.find(type => debt.notes.includes(type))
       }));
 
     const totalDebt = debtDetails
-      .reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0);
+      .reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0)
+      .toFixed(2);
 
     // Ensure totalDebt is a number
     const totalDebtNumber = Number(totalDebt);
@@ -133,7 +134,8 @@ exports.handler = async (event, context) => {
     const totalMonthlyPayment = debts
       .filter(debt => parseFloat(debt.current_debt_amount) >= 500 &&
         allowedDebtTypes.some(type => debt.notes.includes(type)))
-      .reduce((acc, debt) => acc + parseFloat(debt.current_payment), 0);
+      .reduce((acc, debt) => acc + parseFloat(debt.current_payment), 0)
+      .toFixed(2);
 
     // Ensure totalMonthlyPayment is a number
     const totalMonthlyPaymentNumber = Number(totalMonthlyPayment);
@@ -154,14 +156,14 @@ exports.handler = async (event, context) => {
       throw new Error('Calculated value is NaN in current situation');
     }
 
-    // Debt Modification Program Calculation with 25% reduction
-    const modified_total_debt = totalDebtNumber * 0.75; // 25% reduction
-
     // Determine the number of accounts
     const numOfAccounts = debtDetails.length;
 
     // Use the determinePayoffTime function to get the modified payoff time
     const modified_payoff_time_months = determinePayoffTime(totalDebtNumber, numOfAccounts);
+
+    // Debt Modification Program Calculation with 25% reduction and additional fees
+    const modified_total_debt = (totalDebtNumber * 0.75) + 10.95 + (10.95 * modified_payoff_time_months);
 
     // Calculate the exact modified monthly payment
     const exact_modified_monthly_payment = modified_total_debt / modified_payoff_time_months;
@@ -183,18 +185,18 @@ exports.handler = async (event, context) => {
       }),
       debts: debtDetails,
       creditUtilization: creditReport.revolvingCreditUtilization,
-      totalDebt: totalDebtNumber,
+      totalDebt: totalDebtNumber.toFixed(2),
       currentSituation: {
-        monthlyPayment: totalMonthlyPaymentNumber,
+        monthlyPayment: totalMonthlyPaymentNumber.toFixed(2),
         payoffTime: payoff_time_months,
-        interestCost: total_interest_cost,
-        totalCost: total_cost
+        interestCost: total_interest_cost.toFixed(2),
+        totalCost: total_cost.toFixed(2)
       },
       debtModificationProgram: {
-        monthlyPayment: exact_modified_monthly_payment,
+        monthlyPayment: exact_modified_monthly_payment.toFixed(2),
         payoffTime: modified_payoff_time_months,
         interestCost: "0.00",
-        totalCost: modified_total_debt
+        totalCost: modified_total_debt.toFixed(2)
       }
     };
 

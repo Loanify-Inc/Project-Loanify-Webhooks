@@ -149,14 +149,14 @@ exports.handler = async (event, context) => {
       throw new Error('Calculated value is NaN in current situation');
     }
 
-    // Debt Modification Program Calculation with 25% reduction
-    const modified_total_debt = totalDebtNumber * 0.75; // 25% reduction
-
     // Determine the number of accounts
     const numOfAccounts = debtDetails.length;
 
     // Use the determinePayoffTime function to get the modified payoff time
     const modified_payoff_time_months = determinePayoffTime(totalDebtNumber, numOfAccounts);
+
+    // Debt Modification Program Calculation with 25% reduction and additional fees
+    const modified_total_debt = (totalDebtNumber * 0.75) + 10.95 + (10.95 * modified_payoff_time_months);
 
     // Calculate the exact modified monthly payment
     const exact_modified_monthly_payment = modified_total_debt / modified_payoff_time_months;
