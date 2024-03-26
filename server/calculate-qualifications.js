@@ -52,6 +52,7 @@ exports.handler = async (event, context) => {
       'InstallmentLoan',
     ];
 
+    let totalCreditCardDebt = 0;
     let totalUnsecuredDebt = 0;
 
     const debtDetails = debts
@@ -61,6 +62,10 @@ exports.handler = async (event, context) => {
 
         // Extract the allowed debt type from the notes
         const debtType = allowedDebtTypes.find(type => debt.notes.includes(type));
+
+        if (debtType === "CreditCard" && isDebtAmountValid) {
+          totalCreditCardDebt += parseFloat(debt.current_debt_amount);
+        }
 
         // If debtType is "Unsecured", add its amount to totalUnsecuredDebt
         if (debtType === "Unsecured" && isDebtAmountValid) {
@@ -76,14 +81,17 @@ exports.handler = async (event, context) => {
         debtType: allowedDebtTypes.find(type => debt.notes.includes(type)),
       }));
 
+    totalCreditCardDebt = totalCreditCardDebt.toFixed(2);
     totalUnsecuredDebt = totalUnsecuredDebt.toFixed(2);
-    const unsecuredDebtThresholdMet = parseFloat(totalUnsecuredDebt) > 10000 ? 'Yes' : 'No';
+
+    const totalCreditCardThresholdMet = parseFloat(totalCreditCardDebt) > 10000 ? 'Yes' : 'No';
+    const totalUnsecuredDebtThresholdMet = parseFloat(totalUnsecuredDebt) > 10000 ? 'Yes' : 'No';
 
     const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
     const status = totalDebt >= 10000 ? 'Qualified' : 'Not Qualified';
 
     // Check if total debt meets the threshold of $35,000
-    const debtThresholdMet = parseFloat(totalDebt) >= 35000 ? 'Yes' : 'No';
+    const totalDebtThresholdMet = parseFloat(totalDebt) >= 35000 ? 'Yes' : 'No';
 
     const creditUtilizationRaw = creditReport.revolvingCreditUtilization;
     const creditUtilizationPercentage = creditUtilizationRaw ? parseFloat(creditUtilizationRaw.replace('%', '')) : 'NaN';
@@ -108,9 +116,11 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       body: JSON.stringify({
         totalDebt: totalDebt,
+        totalDebtThresholdMet: totalDebtThresholdMet,
+        totalCreditCardDebt: totalCreditCardDebt,
+        totalCreditCardThresholdMet: totalCreditCardThresholdMet,
         totalUnsecuredDebt: totalUnsecuredDebt,
-        debtThresholdMet: debtThresholdMet,
-        unsecuredDebtThresholdMet: unsecuredDebtThresholdMet,
+        totalUnsecuredDebtThresholdMet: totalUnsecuredDebtThresholdMet,
         creditUtilization: creditUtilization,
         creditScore: creditScore,
         status: status,
