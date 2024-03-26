@@ -148,7 +148,7 @@ exports.handler = async (event, context) => {
 
     // Recalculate total interest cost and total cost based on the final monthly payment
     let total_interest_cost, total_cost;
-    total_interest_cost = (totalMonthlyPaymentNumber * payoff_time_months) - totalDebtNumber;
+    total_interest_cost = totalMonthlyPaymentNumber * payoff_time_months;
     total_cost = totalDebtNumber + total_interest_cost;
 
     // Check for NaN in calculated values
