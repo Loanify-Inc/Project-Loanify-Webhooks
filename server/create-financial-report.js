@@ -163,7 +163,7 @@ exports.handler = async (event, context) => {
     const modified_payoff_time_months = determinePayoffTime(totalDebtNumber, numOfAccounts);
 
     // Debt Modification Program Calculation with 25% reduction and additional fees
-    const modified_total_debt = (totalDebtNumber * 0.75) + 10.95 + (10.95 * modified_payoff_time_months);
+    const modified_total_debt = (totalDebtNumber * 0.75) + 10.95 + (10.95 * (modified_payoff_time_months - 1));
 
     // Calculate the exact modified monthly payment
     const exact_modified_monthly_payment = modified_total_debt / modified_payoff_time_months;
