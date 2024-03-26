@@ -67,14 +67,30 @@ exports.handler = async (event) => {
 
     // Process debts
     const debts = JSON.parse(debtResponse).response;
-    // Your processing logic here...
+    const allowedDebtTypes = [
+      'CreditCard', 'Unsecured', 'CheckCreditOrLineOfCredit', 'Collection',
+      'MedicalDebt', 'ChargeAccount', 'Recreational', 'NoteLoan', 'InstallmentLoan',
+    ];
 
-    // Prepare and return the response
+    const debtDetails = debts
+      .filter(debt => parseFloat(debt.current_debt_amount) >= 500 &&
+        allowedDebtTypes.some(type => debt.notes.includes(type)))
+      .map(debt => ({
+        accountNumber: debt.og_account_num,
+        companyName: debt.creditor.company_name,
+        individualDebtAmount: parseFloat(debt.current_debt_amount),
+        debtType: allowedDebtTypes.find(type => debt.notes.includes(type))
+      }));
+
+    const totalDebt = debtDetails
+      .reduce((acc, debt) => acc + debt.individualDebtAmount, 0);
+
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        // Your response payload here...
+        totalDebt: totalDebt,
+        debts: debtDetails,
       }),
       headers: { 'Access-Control-Allow-Origin': '*' },
     };
