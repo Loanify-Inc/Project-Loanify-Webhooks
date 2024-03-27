@@ -63,7 +63,8 @@ exports.handler = async (event, context) => {
         // Extract the allowed debt type from the notes
         const debtType = allowedDebtTypes.find(type => debt.notes.includes(type));
 
-        if (debtType === "CreditCard" && isDebtAmountValid) {
+        // If debtType is "CreditCard" or "ChargeAccount", add its amount to totalCreditCardDebt
+        if ((debtType === "CreditCard" || debtType === "ChargeAccount") && isDebtAmountValid) {
           totalCreditCardDebt += parseFloat(debt.current_debt_amount);
         }
 
