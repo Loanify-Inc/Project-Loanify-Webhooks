@@ -53,6 +53,8 @@ exports.handler = async (event, context) => {
 
     let totalCreditCardDebt = 0;
     let totalUnsecuredDebt = 0;
+    let totalMedicalDebt = 0;
+    let totalCollectionsDebt = 0;
 
     const debtDetails = debts
       .filter(debt => {
@@ -72,6 +74,16 @@ exports.handler = async (event, context) => {
           totalUnsecuredDebt += parseFloat(debt.current_debt_amount);
         }
 
+        // If debtType is "MedicalDebt", add its amount to totalUnsecuredDebt
+        if (debtType === "MedicalDebt" && isDebtAmountValid) {
+          totalMedicalDebt += parseFloat(debt.current_debt_amount);
+        }
+
+        // If debtType is "MedicalDebt", add its amount to totalUnsecuredDebt
+        if (debtType === "Collection" && isDebtAmountValid) {
+          totalCollectionsDebt += parseFloat(debt.current_debt_amount);
+        }
+
         return isDebtAmountValid && !!debtType;
       })
       .map(debt => ({
@@ -83,9 +95,13 @@ exports.handler = async (event, context) => {
 
     totalCreditCardDebt = totalCreditCardDebt.toFixed(2);
     totalUnsecuredDebt = totalUnsecuredDebt.toFixed(2);
+    totalMedicalDebt = totalMedicalDebt.toFixed(2);
+    totalCollectionsDebt = totalCollectionsDebt.toFixed(2);
 
-    const totalCreditCardThresholdMet = parseFloat(totalCreditCardDebt) > 10000 ? 'Yes' : 'No';
+    const totalCreditCardDebtThresholdMet = parseFloat(totalCreditCardDebt) > 10000 ? 'Yes' : 'No';
     const totalUnsecuredDebtThresholdMet = parseFloat(totalUnsecuredDebt) > 10000 ? 'Yes' : 'No';
+    const totalMedicalDebtThresholdMet = parseFloat(totalMedicalDebt) > 10000 ? 'Yes' : 'No';
+    const totalCollectionsDebtThresholdMet = parseFloat(totalCollectionsDebt) > 10000 ? 'Yes' : 'No';
 
     const totalDebt = debtDetails.reduce((acc, debt) => acc + parseFloat(debt.individualDebtAmount), 0).toFixed(2);
     const status = totalDebt >= 10000 ? 'Qualified' : 'Not Qualified';
@@ -118,9 +134,13 @@ exports.handler = async (event, context) => {
         totalDebt: totalDebt,
         totalDebtThresholdMet: totalDebtThresholdMet,
         totalCreditCardDebt: totalCreditCardDebt,
-        totalCreditCardThresholdMet: totalCreditCardThresholdMet,
+        totalCreditCardDebtThresholdMet: totalCreditCardDebtThresholdMet,
         totalUnsecuredDebt: totalUnsecuredDebt,
         totalUnsecuredDebtThresholdMet: totalUnsecuredDebtThresholdMet,
+        totalMedicalDebt: totalMedicalDebt,
+        totalMedicalDebtThresholdMet: totalMedicalDebtThresholdMet,
+        totalCollectionsDebt: totalCollectionsDebt,
+        totalCollectionsDebtThresholdMet: totalCollectionsDebtThresholdMet,
         creditUtilization: creditUtilization,
         creditScore: creditScore,
         status: status,
