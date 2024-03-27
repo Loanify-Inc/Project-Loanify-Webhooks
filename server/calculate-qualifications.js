@@ -47,7 +47,6 @@ exports.handler = async (event, context) => {
       'Collection',
       'MedicalDebt',
       'ChargeAccount',
-      'Recreational',
       'NoteLoan',
       'InstallmentLoan',
     ];
