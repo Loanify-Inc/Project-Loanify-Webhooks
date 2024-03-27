@@ -7,3 +7,4 @@
 /manually-create-financial-report /.netlify/functions/manually-create-financial-report 200
 /reassign-contact /.netlify/functions/reassign-contact 200
 /run-credit /.netlify/functions/run-credit 200
+/send-slack-notification /.netlify/functions/send-slack-notification 200
