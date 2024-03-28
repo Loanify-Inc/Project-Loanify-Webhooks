@@ -188,8 +188,8 @@ exports.handler = async (event, context) => {
       debtModificationProgram: {
         monthlyPayment: exact_modified_monthly_payment.toFixed(2),
         payoffTime: modified_payoff_time_months,
-        interestCost: "0.00",
-        totalCost: modified_total_debt.toFixed(2)
+        totalCost: modified_total_debt.toFixed(2),
+        totalSavings: (total_cost - modified_total_debt).toFixed(2)
       }
     };
 
@@ -552,9 +552,10 @@ exports.handler = async (event, context) => {
                         <table width="100%" style="border-spacing:0;border-radius: 10px; padding: 15px; background-color: #F5F7FA;">
                           <tr>
                             <td align="center" style="padding:0;">
-                              INTEREST COST:<br/>
-                              <span style="font-size: 24px; font-weight: 600; color: #F21D1D;">$<%= payload.currentSituation.interestCost %>
-                              </span>
+                                AMOUNT PAID:<br/>
+                              <span style="font-size: 24px; font-weight: 600; color: #F21D1D;">$<%= payload.currentSituation.totalCost %>
+                              </span><br/>
+                              <span style="font-size: 10px;">($<%= payload.currentSituation.interestCost %> in Interest)</span>
                             </td>
                           </tr>
                         </table>
@@ -563,9 +564,10 @@ exports.handler = async (event, context) => {
                         <table width="100%" style="border-spacing:0;border-radius: 10px; padding: 15px; background-color: #F5F7FA;">
                           <tr>
                             <td align="center" style="padding:0;">
-                              INTEREST COST:<br/>
-                              <span style="font-size: 24px; font-weight: 600; color: #1DA1F2;">$<%= payload.debtModificationProgram.interestCost %>
-                              </span>
+                                AMOUNT PAID:<br/>
+                              <span style="font-size: 24px; font-weight: 600; color: #1DA1F2;">$<%= payload.debtModificationProgram.totalCost %>
+                              </span><br/>
+                              <span style="font-size: 10px;">(including fees)</span>
                             </td>
                           </tr>
                         </table>
@@ -583,8 +585,8 @@ exports.handler = async (event, context) => {
                         <table width="100%" style="border-spacing:0;border-radius: 10px; padding: 15px; background-color: #F5F7FA;">
                           <tr>
                             <td align="center" style="padding:0;">
-                              TOTAL COST:<br/>
-                              <span style="font-size: 24px; font-weight: 600; color: #F21D1D;">$<%= payload.currentSituation.totalCost %>
+                              AMOUNT SAVED:<br/>
+                              <span style="font-size: 24px; font-weight: 600; color: #F21D1D;">$0
                               </span>
                             </td>
                           </tr>
@@ -594,8 +596,8 @@ exports.handler = async (event, context) => {
                         <table width="100%" style="border-spacing:0;border-radius: 10px; padding: 15px; background-color: #F5F7FA;">
                           <tr>
                             <td align="center" style="padding:0;">
-                              TOTAL COST:<br/>
-                              <span style="font-size: 24px; font-weight: 600; color: #1DA1F2;">$<%= payload.debtModificationProgram.totalCost %>
+                                AMOUNT SAVED:<br/>
+                              <span style="font-size: 24px; font-weight: 600; color: #11C76F;">$<%= payload.debtModificationProgram.totalSavings %>
                               </span>
                             </td>
                           </tr>
@@ -736,11 +738,12 @@ exports.handler = async (event, context) => {
             </table>
           </center>
           </div>
-          //Adding button to download the PDF
+          <!--Adding button to download the PDF-->
           <button onclick="generatePDF()" style="position: fixed; right: 20%; top: 10px;">Download PDF</button>
           
-          //Adding page onload download the PDF            
+              
           <script>
+            //Adding page onload download the PDF        
             window.onload = async function() {
                 const content = document.getElementById('content');
                 const canvas = await html2canvas(content);
@@ -768,8 +771,9 @@ exports.handler = async (event, context) => {
             }
             </script>
 
-            //Adding download button the PDF 
+            
             <script>
+                //Adding download button the PDF 
                 async function generatePDF() {
                     const content = document.getElementById('content');
                     const canvas = await html2canvas(content);
@@ -797,7 +801,7 @@ exports.handler = async (event, context) => {
                 }
             </script>
         </body>
-      </html>
+      </html>    
     `;
 
     // Generate HTML content

@@ -808,7 +808,8 @@ exports.handler = async (event, context) => {
                 }
             </script>
         </body>
-      </html>    `;
+      </html>    
+    `;
 
     // Generate HTML content
     const htmlContent = ejs.render(htmlTemplate, { payload });
