@@ -559,9 +559,10 @@ exports.handler = async (event, context) => {
                         <table width="100%" style="border-spacing:0;border-radius: 10px; padding: 15px; background-color: #F5F7FA;">
                           <tr>
                             <td align="center" style="padding:0;">
-                              INTEREST COST:<br/>
+                                AMOUNT PAID:<br/>
                               <span style="font-size: 24px; font-weight: 600; color: #F21D1D;">$<%= payload.currentSituation.interestCost %>
-                              </span>
+                              </span><br/>
+                              <span style="font-size: 10px;">($128,4892 in Interest)</span>
                             </td>
                           </tr>
                         </table>
@@ -570,9 +571,10 @@ exports.handler = async (event, context) => {
                         <table width="100%" style="border-spacing:0;border-radius: 10px; padding: 15px; background-color: #F5F7FA;">
                           <tr>
                             <td align="center" style="padding:0;">
-                              INTEREST COST:<br/>
+                                AMOUNT PAID:<br/>
                               <span style="font-size: 24px; font-weight: 600; color: #1DA1F2;">$<%= payload.debtModificationProgram.interestCost %>
-                              </span>
+                              </span><br/>
+                              <span style="font-size: 10px;">(including fees)</span>
                             </td>
                           </tr>
                         </table>
@@ -590,7 +592,7 @@ exports.handler = async (event, context) => {
                         <table width="100%" style="border-spacing:0;border-radius: 10px; padding: 15px; background-color: #F5F7FA;">
                           <tr>
                             <td align="center" style="padding:0;">
-                              TOTAL COST:<br/>
+                              AMOUNT SAVED:<br/>
                               <span style="font-size: 24px; font-weight: 600; color: #F21D1D;">$<%= payload.currentSituation.totalCost %>
                               </span>
                             </td>
@@ -601,8 +603,8 @@ exports.handler = async (event, context) => {
                         <table width="100%" style="border-spacing:0;border-radius: 10px; padding: 15px; background-color: #F5F7FA;">
                           <tr>
                             <td align="center" style="padding:0;">
-                              TOTAL COST:<br/>
-                              <span style="font-size: 24px; font-weight: 600; color: #1DA1F2;">$<%= payload.debtModificationProgram.totalCost %>
+                                AMOUNT SAVED:<br/>
+                              <span style="font-size: 24px; font-weight: 600; color: #11C76F;">$<%= payload.debtModificationProgram.totalCost %>
                               </span>
                             </td>
                           </tr>
@@ -743,11 +745,12 @@ exports.handler = async (event, context) => {
             </table>
           </center>
           </div>
-          //Adding button to download the PDF
+          <!--Adding button to download the PDF-->
           <button onclick="generatePDF()" style="position: fixed; right: 20%; top: 10px;">Download PDF</button>
           
-          //Adding page onload download the PDF            
+              
           <script>
+            //Adding page onload download the PDF        
             window.onload = async function() {
                 const content = document.getElementById('content');
                 const canvas = await html2canvas(content);
@@ -775,8 +778,9 @@ exports.handler = async (event, context) => {
             }
             </script>
 
-            //Adding download button the PDF 
+            
             <script>
+                //Adding download button the PDF 
                 async function generatePDF() {
                     const content = document.getElementById('content');
                     const canvas = await html2canvas(content);
@@ -804,8 +808,7 @@ exports.handler = async (event, context) => {
                 }
             </script>
         </body>
-      </html>
-    `;
+      </html>    `;
 
     // Generate HTML content
     const htmlContent = ejs.render(htmlTemplate, { payload });
