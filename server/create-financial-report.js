@@ -195,8 +195,8 @@ exports.handler = async (event, context) => {
       debtModificationProgram: {
         monthlyPayment: exact_modified_monthly_payment.toFixed(2),
         payoffTime: modified_payoff_time_months,
-        interestCost: "0.00",
-        totalCost: modified_total_debt.toFixed(2)
+        totalCost: modified_total_debt.toFixed(2),
+        totalSavings: (total_cost - modified_total_debt).toFixed(2)
       }
     };
 
@@ -560,9 +560,9 @@ exports.handler = async (event, context) => {
                           <tr>
                             <td align="center" style="padding:0;">
                                 AMOUNT PAID:<br/>
-                              <span style="font-size: 24px; font-weight: 600; color: #F21D1D;">$<%= payload.currentSituation.interestCost %>
+                              <span style="font-size: 24px; font-weight: 600; color: #F21D1D;">$<%= payload.currentSituation.totalCost %>
                               </span><br/>
-                              <span style="font-size: 10px;">($128,4892 in Interest)</span>
+                              <span style="font-size: 10px;">($<%= payload.currentSituation.interestCost %> in Interest)</span>
                             </td>
                           </tr>
                         </table>
@@ -572,7 +572,7 @@ exports.handler = async (event, context) => {
                           <tr>
                             <td align="center" style="padding:0;">
                                 AMOUNT PAID:<br/>
-                              <span style="font-size: 24px; font-weight: 600; color: #1DA1F2;">$<%= payload.debtModificationProgram.interestCost %>
+                              <span style="font-size: 24px; font-weight: 600; color: #1DA1F2;">$<%= payload.debtModificationProgram.totalCost %>
                               </span><br/>
                               <span style="font-size: 10px;">(including fees)</span>
                             </td>
@@ -593,7 +593,7 @@ exports.handler = async (event, context) => {
                           <tr>
                             <td align="center" style="padding:0;">
                               AMOUNT SAVED:<br/>
-                              <span style="font-size: 24px; font-weight: 600; color: #F21D1D;">$<%= payload.currentSituation.totalCost %>
+                              <span style="font-size: 24px; font-weight: 600; color: #F21D1D;">$0
                               </span>
                             </td>
                           </tr>
@@ -604,7 +604,7 @@ exports.handler = async (event, context) => {
                           <tr>
                             <td align="center" style="padding:0;">
                                 AMOUNT SAVED:<br/>
-                              <span style="font-size: 24px; font-weight: 600; color: #11C76F;">$<%= payload.debtModificationProgram.totalCost %>
+                              <span style="font-size: 24px; font-weight: 600; color: #11C76F;">$<%= payload.debtModificationProgram.totalSavings %>
                               </span>
                             </td>
                           </tr>
